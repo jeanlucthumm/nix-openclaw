@@ -437,7 +437,7 @@ let
           let missing = missingFor p;
           in {
             assertion = missing == [];
-            message = "programs.clawdis.instances.${instName}: plugin ${p.name} missing required env: ${lib.concatStringsSep \", \" missing}";
+            message = "programs.clawdis.instances.${instName}: plugin ${p.name} missing required env: ${lib.concatStringsSep ", " missing}";
           };
         mkConfigAssertion = p: {
           assertion = !(configMissingStateDir p);

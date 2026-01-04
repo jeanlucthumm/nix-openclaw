@@ -106,6 +106,29 @@ Use this for the simplest setup. For richer config (per‑group overrides), use
 
 Then: `home-manager switch --flake .#youruser`
 
+## First‑party plugin toggles
+
+nix‑clawdbot exposes named switches for first‑party plugins (from
+`clawdbot/nix-stepiete-tools`). Defaults: `summarize` and `peekaboo` are on,
+everything else is off.
+
+```nix
+{
+  programs.clawdbot.firstParty = {
+    summarize.enable = true;
+    peekaboo.enable = true;
+    oracle.enable = false;
+    poltergeist.enable = false;
+    sag.enable = false;
+    camsnap.enable = false;
+    gogcli.enable = false;
+    bird.enable = false;
+    sonoscli.enable = false;
+    imsg.enable = false;
+  };
+}
+```
+
 ## Small but useful config (sensible defaults)
 
 This is still single‑instance, but uses `instances.default` to unlock per‑group mention rules.

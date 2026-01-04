@@ -28,6 +28,25 @@ let
     };
   };
 
+  firstPartySources = {
+    summarize = "github:clawdbot/nix-stepiete-tools?dir=tools/summarize";
+    peekaboo = "github:clawdbot/nix-stepiete-tools?dir=tools/peekaboo";
+    oracle = "github:clawdbot/nix-stepiete-tools?dir=tools/oracle";
+    poltergeist = "github:clawdbot/nix-stepiete-tools?dir=tools/poltergeist";
+    sag = "github:clawdbot/nix-stepiete-tools?dir=tools/sag";
+    camsnap = "github:clawdbot/nix-stepiete-tools?dir=tools/camsnap";
+    gogcli = "github:clawdbot/nix-stepiete-tools?dir=tools/gogcli";
+    bird = "github:clawdbot/nix-stepiete-tools?dir=tools/bird";
+    sonoscli = "github:clawdbot/nix-stepiete-tools?dir=tools/sonoscli";
+    imsg = "github:clawdbot/nix-stepiete-tools?dir=tools/imsg";
+  };
+
+  firstPartyPlugins = lib.filter (p: p != null) (lib.mapAttrsToList (name: source:
+    if (cfg.firstParty.${name}.enable or false) then { inherit source; } else null
+  ) firstPartySources);
+
+  effectivePlugins = cfg.plugins ++ firstPartyPlugins;
+
   instanceModule = { name, config, ... }: {
     options = {
       enable = lib.mkOption {
@@ -130,8 +149,8 @@ let
             };
           };
         });
-        default = cfg.plugins;
-        description = "Plugins enabled for this instance.";
+        default = effectivePlugins;
+        description = "Plugins enabled for this instance (includes first-party toggles).";
       };
 
       providers.anthropic = {
@@ -825,7 +844,60 @@ in {
         };
       });
       default = [];
-      description = "Plugins enabled for the default instance.";
+      description = "Plugins enabled for the default instance (merged with first-party toggles).";
+    };
+
+    firstParty = {
+      summarize.enable = lib.mkOption {
+        type = lib.types.bool;
+        default = true;
+        description = "Enable the summarize plugin (first-party).";
+      };
+      peekaboo.enable = lib.mkOption {
+        type = lib.types.bool;
+        default = true;
+        description = "Enable the peekaboo plugin (first-party).";
+      };
+      oracle.enable = lib.mkOption {
+        type = lib.types.bool;
+        default = false;
+        description = "Enable the oracle plugin (first-party).";
+      };
+      poltergeist.enable = lib.mkOption {
+        type = lib.types.bool;
+        default = false;
+        description = "Enable the poltergeist plugin (first-party).";
+      };
+      sag.enable = lib.mkOption {
+        type = lib.types.bool;
+        default = false;
+        description = "Enable the sag plugin (first-party).";
+      };
+      camsnap.enable = lib.mkOption {
+        type = lib.types.bool;
+        default = false;
+        description = "Enable the camsnap plugin (first-party).";
+      };
+      gogcli.enable = lib.mkOption {
+        type = lib.types.bool;
+        default = false;
+        description = "Enable the gogcli plugin (first-party).";
+      };
+      bird.enable = lib.mkOption {
+        type = lib.types.bool;
+        default = false;
+        description = "Enable the bird plugin (first-party).";
+      };
+      sonoscli.enable = lib.mkOption {
+        type = lib.types.bool;
+        default = false;
+        description = "Enable the sonoscli plugin (first-party).";
+      };
+      imsg.enable = lib.mkOption {
+        type = lib.types.bool;
+        default = false;
+        description = "Enable the imsg plugin (first-party).";
+      };
     };
 
     providers.telegram = {

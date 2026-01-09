@@ -160,4 +160,8 @@ Tests:
 - nix build .#clawdbot-app --accept-flake-config
 EOF
 
+log "Rebasing on latest main"
+git fetch origin main
+git rebase origin/main
+
 git push origin HEAD:main

@@ -1,0 +1,36 @@
+name: Cache Only
+
+on:
+  pull_request:
+  push:
+    branches: [ main ]
+
+jobs:
+  cache-only:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@v13
+
+      - name: Fail fast on cache misses
+        env:
+          NIX_CONFIG: |
+            max-jobs = 0
+            builders =
+            fallback = false
+        run: |
+          nix build --no-link --accept-flake-config \
+            .#packages.aarch64-darwin.clawdbot \
+            .#packages.aarch64-darwin.clawdbot-gateway \
+            .#packages.aarch64-darwin.clawdbot-tools \
+            .#packages.aarch64-darwin.clawdbot-app \
+            .#packages.x86_64-linux.clawdbot \
+            .#packages.x86_64-linux.clawdbot-gateway \
+            .#packages.x86_64-linux.clawdbot-tools \
+            .#checks.aarch64-darwin.gateway \
+            .#checks.x86_64-linux.gateway \
+            .#checks.x86_64-linux.gateway-tests \
+            .#checks.x86_64-linux.config-options

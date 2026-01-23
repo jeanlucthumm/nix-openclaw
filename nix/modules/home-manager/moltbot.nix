@@ -812,20 +812,20 @@ let
         };
         Service = {
           ExecStart = "${gatewayWrapper}/bin/moltbot-gateway-${name} gateway --port ${toString inst.gatewayPort}";
-          WorkingDirectory = inst.stateDir;
+          WorkingDirectory = resolvePath inst.stateDir;
           Restart = "always";
           RestartSec = "1s";
           Environment = [
             "HOME=${homeDir}"
-            "MOLTBOT_CONFIG_PATH=${inst.configPath}"
-            "MOLTBOT_STATE_DIR=${inst.stateDir}"
+            "MOLTBOT_CONFIG_PATH=${resolvePath inst.configPath}"
+            "MOLTBOT_STATE_DIR=${resolvePath inst.stateDir}"
             "MOLTBOT_NIX_MODE=1"
-            "CLAWDBOT_CONFIG_PATH=${inst.configPath}"
-            "CLAWDBOT_STATE_DIR=${inst.stateDir}"
+            "CLAWDBOT_CONFIG_PATH=${resolvePath inst.configPath}"
+            "CLAWDBOT_STATE_DIR=${resolvePath inst.stateDir}"
             "CLAWDBOT_NIX_MODE=1"
           ];
-          StandardOutput = "append:${inst.logPath}";
-          StandardError = "append:${inst.logPath}";
+          StandardOutput = "append:${resolvePath inst.logPath}";
+          StandardError = "append:${resolvePath inst.logPath}";
         };
         Install = {
           WantedBy = [ "default.target" ];

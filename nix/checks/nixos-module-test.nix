@@ -21,9 +21,17 @@ pkgs.testers.nixosTest {
     services.clawdbot = {
       enable = true;
       package = pkgs.clawdbot-gateway;
-      # No API key - service will start but won't be fully functional
-      # That's fine for testing systemd/hardening
+      # Dummy token for testing - service won't be fully functional but will start
+      providers.anthropic.oauthTokenFile = "/run/clawdbot-test-token";
+      gateway.auth.tokenFile = "/run/clawdbot-gateway-token";
     };
+
+    # Create dummy token files for testing
+    system.activationScripts.clawdbotTestTokens = ''
+      echo "test-oauth-token" > /run/clawdbot-test-token
+      echo "test-gateway-token" > /run/clawdbot-gateway-token
+      chmod 600 /run/clawdbot-test-token /run/clawdbot-gateway-token
+    '';
 
     # Create a test file in /home to verify hardening
     users.users.testuser = {

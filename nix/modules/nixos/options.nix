@@ -87,19 +87,18 @@ let
         apiKeyFile = lib.mkOption {
           type = lib.types.str;
           default = cfg.providers.anthropic.apiKeyFile;
-          description = "Path to Anthropic API key file.";
+          description = "Path to Anthropic API key file (sets ANTHROPIC_API_KEY).";
         };
 
-        oauthCredentialsDir = lib.mkOption {
+        oauthTokenFile = lib.mkOption {
           type = lib.types.nullOr lib.types.str;
-          default = cfg.providers.anthropic.oauthCredentialsDir;
+          default = cfg.providers.anthropic.oauthTokenFile;
           description = ''
-            Path to Claude CLI credentials directory (typically ~/.claude).
-            When set, this directory is bind-mounted into the service's sandbox,
-            allowing the service to use OAuth credentials from `claude` CLI auth.
-            The service can read and write to this directory (for token refresh).
+            Path to file containing an Anthropic OAuth token (sets ANTHROPIC_OAUTH_TOKEN).
+            Generate with `claude setup-token` - these tokens are long-lived.
+            This is the recommended auth method for headless/server deployments.
           '';
-          example = "/home/myuser/.claude";
+          example = "/run/agenix/clawdbot-anthropic-token";
         };
       };
 
@@ -346,19 +345,18 @@ in {
       apiKeyFile = lib.mkOption {
         type = lib.types.str;
         default = "";
-        description = "Path to Anthropic API key file.";
+        description = "Path to Anthropic API key file (sets ANTHROPIC_API_KEY).";
       };
 
-      oauthCredentialsDir = lib.mkOption {
+      oauthTokenFile = lib.mkOption {
         type = lib.types.nullOr lib.types.str;
         default = null;
         description = ''
-          Path to Claude CLI credentials directory (typically ~/.claude).
-          When set, this directory is bind-mounted into the service's sandbox,
-          allowing the service to use OAuth credentials from `claude` CLI auth.
-          The service can read and write to this directory (for token refresh).
+          Path to file containing an Anthropic OAuth token (sets ANTHROPIC_OAUTH_TOKEN).
+          Generate with `claude setup-token` - these tokens are long-lived.
+          This is the recommended auth method for headless/server deployments.
         '';
-        example = "/home/myuser/.claude";
+        example = "/run/agenix/clawdbot-anthropic-token";
       };
     };
 

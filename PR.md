@@ -24,6 +24,7 @@ Tested and deployed successfully. The service runs with full systemd hardening.
 
 - `nix/modules/nixos/clawdbot.nix` - Main module
 - `nix/modules/nixos/options.nix` - Option definitions
+- `nix/modules/nixos/documents-skills.nix` - Documents and skills installation
 
 ### Features
 

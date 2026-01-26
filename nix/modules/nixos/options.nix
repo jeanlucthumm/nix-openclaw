@@ -60,19 +60,19 @@ let
       providers.telegram = {
         enable = lib.mkOption {
           type = lib.types.bool;
-          default = false;
+          default = cfg.providers.telegram.enable;
           description = "Enable Telegram provider.";
         };
 
         botTokenFile = lib.mkOption {
           type = lib.types.str;
-          default = "";
+          default = cfg.providers.telegram.botTokenFile;
           description = "Path to Telegram bot token file.";
         };
 
         allowFrom = lib.mkOption {
           type = lib.types.listOf lib.types.int;
-          default = [];
+          default = cfg.providers.telegram.allowFrom;
           description = "Allowed Telegram chat IDs.";
         };
 
@@ -86,13 +86,13 @@ let
       providers.anthropic = {
         apiKeyFile = lib.mkOption {
           type = lib.types.str;
-          default = "";
+          default = cfg.providers.anthropic.apiKeyFile;
           description = "Path to Anthropic API key file.";
         };
 
         oauthCredentialsDir = lib.mkOption {
           type = lib.types.nullOr lib.types.str;
-          default = null;
+          default = cfg.providers.anthropic.oauthCredentialsDir;
           description = ''
             Path to Claude CLI credentials directory (typically ~/.claude).
             When set, this directory is bind-mounted into the service's sandbox,

@@ -241,54 +241,8 @@ in {
       description = "Workspace directory for Clawdbot agent skills.";
     };
 
-    documents = lib.mkOption {
-      type = lib.types.nullOr lib.types.path;
-      default = null;
-      description = "Path to documents directory (AGENTS.md, SOUL.md, TOOLS.md).";
-    };
-
-    skills = lib.mkOption {
-      type = lib.types.listOf (lib.types.submodule {
-        options = {
-          name = lib.mkOption {
-            type = lib.types.str;
-            description = "Skill name (directory name).";
-          };
-          description = lib.mkOption {
-            type = lib.types.str;
-            default = "";
-            description = "Short description for skill frontmatter.";
-          };
-          homepage = lib.mkOption {
-            type = lib.types.nullOr lib.types.str;
-            default = null;
-            description = "Optional homepage URL.";
-          };
-          body = lib.mkOption {
-            type = lib.types.str;
-            default = "";
-            description = "Optional skill body (markdown).";
-          };
-          clawdbot = lib.mkOption {
-            type = lib.types.nullOr lib.types.attrs;
-            default = null;
-            description = "Optional clawdbot metadata.";
-          };
-          mode = lib.mkOption {
-            type = lib.types.enum [ "symlink" "copy" "inline" ];
-            default = "copy";  # Default to copy for system service (no user home)
-            description = "Install mode for the skill.";
-          };
-          source = lib.mkOption {
-            type = lib.types.nullOr lib.types.str;
-            default = null;
-            description = "Source path for the skill (required for symlink/copy).";
-          };
-        };
-      });
-      default = [];
-      description = "Declarative skills installed into workspace.";
-    };
+    # NOTE: documents and skills options are not yet implemented for NixOS module.
+    # See home-manager module for the full implementation. PRs welcome.
 
     plugins = lib.mkOption {
       type = lib.types.listOf (lib.types.submodule {

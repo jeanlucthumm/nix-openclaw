@@ -399,11 +399,5 @@ in {
         example = "/run/agenix/clawdbot-gateway-password";
       };
     };
-
-    instances = lib.mkOption {
-      type = lib.types.attrsOf (lib.types.submodule instanceModule);
-      default = {};
-      description = "Named Clawdbot instances.";
-    };
   };
 }

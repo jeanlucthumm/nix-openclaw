@@ -3,11 +3,11 @@
 # Runs the Clawdbot gateway as an isolated system user with systemd hardening.
 # This contains the blast radius if the LLM is compromised.
 #
-# Example usage (OAuth - recommended, uses Claude Pro/Max subscription):
+# Example usage (setup-token - recommended for servers):
 #   services.clawdbot = {
 #     enable = true;
-#     # Use Claude CLI OAuth credentials (run `claude` to authenticate first)
-#     providers.anthropic.oauthCredentialsDir = "/home/myuser/.claude";
+#     # Run `claude setup-token` once, store in agenix
+#     providers.anthropic.oauthTokenFile = "/run/agenix/clawdbot-anthropic-token";
 #     providers.telegram = {
 #       enable = true;
 #       botTokenFile = "/run/agenix/telegram-bot-token";
@@ -111,8 +111,7 @@ let
   mkInstanceConfig = name: inst:
     let
       gatewayPackage = inst.package;
-      oauthDir = inst.providers.anthropic.oauthCredentialsDir;
-      hasOauth = oauthDir != null;
+      oauthTokenFile = inst.providers.anthropic.oauthTokenFile;
 
       baseConfig = mkBaseConfig inst.workspaceDir inst;
       mergedConfig = lib.recursiveUpdate
@@ -139,6 +138,21 @@ let
           fi
           export ANTHROPIC_API_KEY
         fi
+
+        # Load Anthropic OAuth token if configured (from claude setup-token)
+        ${lib.optionalString (oauthTokenFile != null) ''
+        if [ -f "${oauthTokenFile}" ]; then
+          ANTHROPIC_OAUTH_TOKEN="$(cat "${oauthTokenFile}")"
+          if [ -z "$ANTHROPIC_OAUTH_TOKEN" ]; then
+            echo "Anthropic OAuth token file is empty: ${oauthTokenFile}" >&2
+            exit 1
+          fi
+          export ANTHROPIC_OAUTH_TOKEN
+        else
+          echo "Anthropic OAuth token file not found: ${oauthTokenFile}" >&2
+          exit 1
+        fi
+        ''}
 
         # Load gateway token if configured
         ${lib.optionalString (gatewayTokenFile != null) ''
@@ -177,7 +191,7 @@ let
         then "clawdbot-gateway"
         else "clawdbot-gateway-${name}";
     in {
-      inherit configFile configJson unitName gatewayWrapper hasOauth oauthDir;
+      inherit configFile configJson unitName gatewayWrapper;
       configPath = inst.configPath;
       stateDir = inst.stateDir;
       workspaceDir = inst.workspaceDir;
@@ -262,9 +276,7 @@ in {
         ];
 
         # Hardening options
-        # ProtectHome disabled when OAuth credentials are in /home
-        # (BindPaths can't access /home when ProtectHome=true)
-        ProtectHome = !instCfg.hasOauth;
+        ProtectHome = true;
         ProtectSystem = "strict";
         PrivateTmp = true;
         PrivateDevices = true;
@@ -309,10 +321,6 @@ in {
 
         # UMask for created files
         UMask = "0027";
-      } // lib.optionalAttrs instCfg.hasOauth {
-        # Bind-mount OAuth credentials dir into service's home
-        # This allows the service to use Claude CLI OAuth while remaining sandboxed
-        BindPaths = [ "${instCfg.oauthDir}:${cfg.stateDir}/.claude" ];
       };
     }) instanceConfigs;
 

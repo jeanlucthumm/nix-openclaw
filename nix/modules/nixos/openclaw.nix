@@ -293,7 +293,8 @@ in {
         IPAddressDeny = "multicast";
 
         # System call filtering
-        SystemCallFilter = [ "@system-service" "~@privileged" "~@resources" ];
+        # Note: @resources filter removed - clipboard native module needs resource syscalls
+        SystemCallFilter = [ "@system-service" "~@privileged" ];
         SystemCallArchitectures = "native";
 
         # Memory protection

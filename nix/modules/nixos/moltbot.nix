@@ -70,7 +70,8 @@ let
 
   # Config generation helpers (mirrored from home-manager)
   mkBaseConfig = workspaceDir: inst: {
-    gateway = { mode = "local"; };
+    gateway = { mode = "local"; }
+      // lib.optionalAttrs (inst.gateway.bind != null) { bind = inst.gateway.bind; };
     agents = {
       defaults = {
         workspace = workspaceDir;

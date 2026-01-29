@@ -151,6 +151,12 @@ let
         };
       };
 
+      gateway.bind = lib.mkOption {
+        type = lib.types.nullOr (lib.types.enum [ "auto" "lan" "loopback" "custom" "tailnet" ]);
+        default = cfg.gateway.bind;
+        description = "Gateway bind mode.";
+      };
+
       gateway.auth = {
         mode = lib.mkOption {
           type = lib.types.enum [ "token" "password" ];
@@ -376,6 +382,12 @@ in {
         };
         description = "Per-channel queue mode overrides.";
       };
+    };
+
+    gateway.bind = lib.mkOption {
+      type = lib.types.nullOr (lib.types.enum [ "auto" "lan" "loopback" "custom" "tailnet" ]);
+      default = null;
+      description = "Gateway bind mode.";
     };
 
     gateway.auth = {

@@ -333,6 +333,12 @@ in {
         default = [];
         description = "Allowed Telegram chat IDs.";
       };
+
+      groups = lib.mkOption {
+        type = lib.types.attrs;
+        default = {};
+        description = "Per-group Telegram overrides.";
+      };
     };
 
     providers.anthropic = {

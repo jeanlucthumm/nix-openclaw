@@ -151,6 +151,12 @@ let
         };
       };
 
+      gateway.bind = lib.mkOption {
+        type = lib.types.nullOr (lib.types.enum [ "auto" "lan" "loopback" "custom" "tailnet" ]);
+        default = cfg.gateway.bind;
+        description = "Gateway bind mode.";
+      };
+
       gateway.auth = {
         mode = lib.mkOption {
           type = lib.types.enum [ "token" "password" ];
@@ -333,6 +339,12 @@ in {
         default = [];
         description = "Allowed Telegram chat IDs.";
       };
+
+      groups = lib.mkOption {
+        type = lib.types.attrs;
+        default = {};
+        description = "Per-group Telegram overrides.";
+      };
     };
 
     providers.anthropic = {
@@ -370,6 +382,12 @@ in {
         };
         description = "Per-channel queue mode overrides.";
       };
+    };
+
+    gateway.bind = lib.mkOption {
+      type = lib.types.nullOr (lib.types.enum [ "auto" "lan" "loopback" "custom" "tailnet" ]);
+      default = null;
+      description = "Gateway bind mode.";
     };
 
     gateway.auth = {

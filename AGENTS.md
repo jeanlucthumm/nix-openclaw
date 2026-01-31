@@ -62,9 +62,10 @@ Golden path for pins (yolo + manual bumps):
 - To verify freshness: `git pull --ff-only` and check `nix/sources/openclaw-source.nix` vs `git ls-remote https://github.com/openclaw/openclaw.git refs/heads/main`.
 - If upstream is moving fast and tighter freshness is needed, trigger yolo manually: `gh workflow run "Yolo Update Pins"`.
 
-CI polling:
-- Do not claim "I'll keep polling" without an active bash loop.
-- Use a blocking loop in tmux (preferred) or a sub-agent.
+CI polling (hard rule):
+- Never say "I'll keep polling" unless you are **already** running a blocking loop.
+- If you must report status, confirm the loop is active (`tmux ls` / session name).
+- Use a blocking bash loop in tmux (preferred) or a sub-agent; do not fake it.
 - Example: `tmux new -s nix-openclaw-ci '/tmp/poll-nix-openclaw-ci.sh'`.
 
 Philosophy:

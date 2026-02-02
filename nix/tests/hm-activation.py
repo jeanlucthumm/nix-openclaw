@@ -42,12 +42,9 @@ except Exception:
     machine.succeed("tail -n 200 /tmp/openclaw/node-report* || true")
     machine.succeed("coredumpctl info --no-pager | tail -n 200 || true")
     machine.succeed(
-        f"su - alice -c '{user_env} systemctl --user show openclaw-gateway.service --no-pager -p Environment 2>&1 | sed -n \"s/^Environment=//p\"' || true"
+        f"su - alice -c '{user_env} systemctl --user show openclaw-gateway.service --no-pager -p Environment 2>&1 | sed -n \"s/^Environment=/ENVIRONMENT=/p\"; echo ENVIRONMENT_DONE' || true"
     )
     machine.succeed(
-        f"su - alice -c '{user_env} systemctl --user cat openclaw-gateway.service --no-pager 2>&1 | sed -n \"s/^[[:space:]]*Environment=//p\"' || true"
-    )
-    machine.succeed(
-        f"su - alice -c '{user_env} systemctl --user cat openclaw-gateway.service --no-pager 2>&1 | sed -n \"1,200p\"' || true"
+        f"su - alice -c '{user_env} echo UNIT_FILE_START; systemctl --user cat openclaw-gateway.service --no-pager 2>&1 | sed -n \"1,200p\" | sed -e \"s/^/UNIT| /\"; echo UNIT_FILE_END' || true"
     )
     raise

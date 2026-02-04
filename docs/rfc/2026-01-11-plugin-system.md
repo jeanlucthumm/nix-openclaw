@@ -211,7 +211,7 @@ nix-openclaw is a **plugin installer** that wires plugins into openclaw's plugin
 
 ```nix
 # User's flake.nix
-programs.openclaw.plugins = [
+programs.openclaw.customPlugins = [
   # Remote: point at GitHub repo
   { source = "github:joshp123/xuezh"; }
   { source = "github:joshp123/padel-cli"; }
@@ -220,9 +220,9 @@ programs.openclaw.plugins = [
   { source = "path:/Users/josh/code/my-plugin"; }
 ];
 
-# Or enable first-party plugins (pinned in nix-openclaw):
-programs.openclaw.firstParty.summarize.enable = true;
-programs.openclaw.firstParty.oracle.enable = true;
+# Or enable bundled plugins (pinned in nix-openclaw):
+programs.openclaw.bundledPlugins.summarize.enable = true;
+programs.openclaw.bundledPlugins.oracle.enable = true;
 ```
 
 **Same contract, multiple sources:**
@@ -318,7 +318,7 @@ Install wires up Twilio creds. Binary handles webhook server. Skill teaches agen
 
 All follow the same contract. All pinned in nix-openclaw. Enable with one line:
 ```nix
-programs.openclaw.firstParty.summarize.enable = true;
+programs.openclaw.bundledPlugins.summarize.enable = true;
 ```
 
 **Community plugins** (anyone can ship):

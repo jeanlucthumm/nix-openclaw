@@ -100,7 +100,7 @@ in {
       description = "Declarative skills installed into each instance workspace.";
     };
 
-    plugins = lib.mkOption {
+    customPlugins = lib.mkOption {
       type = lib.types.listOf (lib.types.submodule {
         options = {
           source = lib.mkOption {
@@ -115,20 +115,20 @@ in {
         };
       });
       default = [];
-      description = "Plugins enabled for the default instance (merged with first-party toggles).";
+      description = "Custom/community plugins (merged with bundled plugin toggles).";
     };
 
-    firstParty = let
+    bundledPlugins = let
       mkPlugin = { name, defaultEnable ? false }: {
         enable = lib.mkOption {
           type = lib.types.bool;
           default = defaultEnable;
-          description = "Enable the ${name} plugin (first-party).";
+          description = "Enable the ${name} plugin (bundled).";
         };
         config = lib.mkOption {
           type = lib.types.attrs;
           default = {};
-          description = "Plugin configuration passed through to ${name} (env/settings).";
+          description = "Bundled plugin configuration passed through to ${name} (env/settings).";
         };
       };
     in {

@@ -90,7 +90,7 @@ let
             launchd.enable = false;
             systemd.enable = false;
             instances.default = {};
-            firstParty = lib.mapAttrs (name: _: { enable = enableFirstParty name; }) options.programs.openclaw.firstParty;
+            bundledPlugins = lib.mapAttrs (name: _: { enable = enableFirstParty name; }) options.programs.openclaw.bundledPlugins;
           };
         };
       })

@@ -18,7 +18,7 @@ let
   appPackage = if cfg.appPackage != null then cfg.appPackage else defaultPackage;
   generatedConfigOptions = import ../../../generated/openclaw-config-options.nix { lib = lib; };
 
-  firstPartySources = let
+  bundledPluginSources = let
     stepieteRev = "203442241f72839e3681affdc131134882109e54";
     stepieteNarHash = "sha256-f/I0V+uLjo2Xzw88sjvVo5vlDq8itmQo9qOvJQ3e+EI=";
     stepiete = tool:
@@ -37,17 +37,17 @@ let
     imsg = stepiete "imsg";
   };
 
-  firstPartyPlugins = lib.filter (p: p != null) (lib.mapAttrsToList (name: source:
+  bundledPlugins = lib.filter (p: p != null) (lib.mapAttrsToList (name: source:
     let
-      pluginCfg = cfg.firstParty.${name};
+      pluginCfg = cfg.bundledPlugins.${name};
     in
       if (pluginCfg.enable or false) then {
         inherit source;
         config = pluginCfg.config or {};
       } else null
-  ) firstPartySources);
+  ) bundledPluginSources);
 
-  effectivePlugins = cfg.plugins ++ firstPartyPlugins;
+  effectivePlugins = cfg.customPlugins ++ bundledPlugins;
 
   resolvePath = p:
     if lib.hasPrefix "~/" p then
@@ -71,8 +71,8 @@ in {
     defaultPackage
     appPackage
     generatedConfigOptions
-    firstPartySources
-    firstPartyPlugins
+    bundledPluginSources
+    bundledPlugins
     effectivePlugins
     resolvePath
     toRelative;

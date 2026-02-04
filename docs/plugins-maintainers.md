@@ -130,9 +130,9 @@ openclawPlugin = {
 
 Host behavior: creates `~/.config/xuezh/config.json` from `settings`; exports both envs; fails if the pointed files are missing/empty.
 
-## First-Party Plugin Set (current)
+## Bundled Plugin Set (current)
 - summarize, peekaboo, oracle, poltergeist, sag, camsnap, gogcli, goplaces, bird, sonoscli, imsg.
-- Each follows the same contract: packages + skills; env/state declared via `needs`; enabled via config toggle; sources pinned (see nix-openclaw firstParty mapping).
+- Each follows the same contract: packages + skills; env/state declared via `needs`; enabled via config toggle; sources pinned (see nix-openclaw bundledPlugins mapping).
 
 ## Authoring Rules
 - Keep CLIs configurable via env; honor XDG paths; no inline scripts.

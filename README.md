@@ -247,7 +247,7 @@ Plugins extend what Openclaw can do. Each plugin bundles tools and teaches the A
 These ship with nix-openclaw. Toggle them in your config:
 
 ```nix
-programs.openclaw.firstParty = {
+programs.openclaw.bundledPlugins = {
   summarize.enable = true;   # Summarize web pages, PDFs, videos
   peekaboo.enable = true;    # Take screenshots
   oracle.enable = false;     # Web search
@@ -261,8 +261,8 @@ programs.openclaw.firstParty = {
   imsg.enable = false;       # iMessage
 };
 
-# Optional config for first-party plugins
-programs.openclaw.firstParty.goplaces = {
+# Optional config for bundled plugins
+programs.openclaw.bundledPlugins.goplaces = {
   enable = true;
   config.env.GOOGLE_PLACES_API_KEY = "/run/agenix/google-places-api-key";
 };
@@ -289,7 +289,7 @@ Tell your agent: *"Add the plugin from github:owner/repo-name"*
 Or add it manually to your config:
 
 ```nix
-plugins = [
+customPlugins = [
   { source = "github:owner/repo-name"; }
 ];
 ```
@@ -302,7 +302,7 @@ Some plugins need settings (auth files, preferences). Here's a simplified exampl
 
 ```nix
 # Example: a padel court booking plugin (simplified for illustration)
-plugins = [
+customPlugins = [
   {
     source = "github:example/padel-cli";
     config = {

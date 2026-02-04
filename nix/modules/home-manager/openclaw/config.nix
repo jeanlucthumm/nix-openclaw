@@ -83,13 +83,20 @@ let
         export PATH="${lib.makeBinPath pluginPackages}:$PATH"
       fi
 
-      ${lib.concatStringsSep "\n" (map (entry: ''
+      ${lib.concatStringsSep "\n" (map (entry:
+        let
+          isFile = lib.hasSuffix "_FILE" entry.key;
+        in ''
         if [ -f "${entry.value}" ]; then
-          rawValue="$("${lib.getExe' pkgs.coreutils "cat"}" "${entry.value}")"
-          if [ "''${rawValue#${entry.key}=}" != "$rawValue" ]; then
-            export ${entry.key}="''${rawValue#${entry.key}=}"
+          if ${if isFile then "true" else "false"}; then
+            export ${entry.key}="${entry.value}"
           else
-            export ${entry.key}="$rawValue"
+            rawValue="$("${lib.getExe' pkgs.coreutils "cat"}" "${entry.value}")"
+            if [ "''${rawValue#${entry.key}=}" != "$rawValue" ]; then
+              export ${entry.key}="''${rawValue#${entry.key}=}"
+            else
+              export ${entry.key}="$rawValue"
+            fi
           fi
         else
           export ${entry.key}="${entry.value}"

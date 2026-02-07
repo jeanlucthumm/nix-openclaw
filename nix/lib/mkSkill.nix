@@ -41,40 +41,30 @@ let
     throw "mkSkill: secret '${name}' for skill '${resolvedName}' is null — you must provide a file path (e.g. \"/run/agenix/${name}\")"
   );
 
-  drv = pkgs.stdenvNoCC.mkDerivation {
-    pname = "openclaw-skill-${resolvedName}";
-    version = "0.1.0";
-    inherit src;
-
-    # Force evaluation of secret assertions
-    secretCheck = builtins.deepSeq secretAssertions true;
-
-    nativeBuildInputs = lib.optionals hasOverrides [ python3 ];
-
-    dontConfigure = true;
-    dontBuild = true;
-
-    installPhase = ''
-      runHook preInstall
-
-      mkdir -p "$out"
-
-      # Copy everything from source
-      cp -r . "$out/"
-
-      ${lib.optionalString hasOverrides ''
-        # Patch frontmatter
-        ${python3}/bin/python3 ${patcher} "$out/SKILL.md" "$out/SKILL.md" ${overrideArgs}
-      ''}
-
-      runHook postInstall
-    '';
-
-    passthru = {
-      inherit tools env secrets;
-      skillName = resolvedName;
-      isOpenclawSkill = true;
-    };
-  };
 in
-  drv
+pkgs.stdenvNoCC.mkDerivation {
+  pname = "openclaw-skill-${resolvedName}";
+  version = "0.1.0";
+  inherit src;
+
+  secretCheck = builtins.deepSeq secretAssertions true;
+  nativeBuildInputs = lib.optionals hasOverrides [ python3 ];
+  dontConfigure = true;
+  dontBuild = true;
+
+  installPhase = ''
+    runHook preInstall
+    mkdir -p "$out"
+    cp -r . "$out/"
+    ${lib.optionalString hasOverrides ''
+      ${python3}/bin/python3 ${patcher} "$out/SKILL.md" "$out/SKILL.md" ${overrideArgs}
+    ''}
+    runHook postInstall
+  '';
+
+  passthru = {
+    inherit tools env secrets;
+    skillName = resolvedName;
+    isOpenclawSkill = true;
+  };
+}

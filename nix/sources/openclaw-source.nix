@@ -3,7 +3,7 @@
 {
   owner = "jeanlucthumm";
   repo = "openclaw";
-  rev = "19e7f2ef28354a677feba1d44937357b07a72630";
-  hash = "sha256-gVWANMKr4KwO2QsBVE+XJuxamIbyJN5gCKJsnCBI4gI=";
+  rev = "0e2ad8ab241eca4fbaae32c3714aace63337f73f";
+  hash = "sha256-CrK2Ywuu6lTFC0GlNbY96AdEuySAJca7lhBNkunLYec=";
   pnpmDepsHash = "sha256-sfu8dm1KCGzo/6RcqrvmF1mBB78LcWs1YTcWX5hDuGw=";
 }

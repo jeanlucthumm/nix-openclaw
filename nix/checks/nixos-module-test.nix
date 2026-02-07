@@ -102,7 +102,11 @@ pkgs.testers.nixosTest {
         server.succeed("test -d /var/lib/openclaw/workspace/skills/inline-nixos-test")
 
     with subtest("Skill library: gateway wrapper has jq on PATH"):
-        server.succeed("cat $(which openclaw-gateway-default) | grep -q jq || cat /etc/systemd/system/openclaw-gateway.service | grep -q jq")
+        # Extract wrapper path from ExecStart and verify it contains jq in PATH
+        server.succeed(
+            "wrapper=$(grep ExecStart /etc/systemd/system/openclaw-gateway.service | sed 's/.*=//;s/ .*//') && "
+            "cat \"$wrapper\" | grep -q jq"
+        )
 
     with subtest("Service is running as openclaw user"):
         server.succeed(

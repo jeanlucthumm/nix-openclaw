@@ -83,13 +83,28 @@ EOF
     }
   ];
 
+  # Partition skills into derivation-based (from skill library) and inline (submodule)
+  isSkillDrv = s: s ? isOpenclawSkill && s.isOpenclawSkill;
+  drvSkills = lib.filter isSkillDrv cfg.skills;
+  inlineSkills = lib.filter (s: !(isSkillDrv s)) cfg.skills;
+
   # Assertions for skills
+  secretAssertions = lib.flatten (map (s:
+    let nullSecrets = lib.attrNames (lib.filterAttrs (_: v: v == null) (s.secrets or {}));
+    in map (name: {
+      assertion = false;
+      message = "services.openclaw.skills: skill '${s.skillName}' has null secret '${name}' — provide a file path.";
+    }) nullSecrets
+  ) drvSkills);
+
   skillAssertions =
     let
-      names = map (skill: skill.name) cfg.skills;
+      drvNames = map (s: s.skillName) drvSkills;
+      inlineNames = map (s: s.name) inlineSkills;
+      names = drvNames ++ inlineNames;
       nameCounts = lib.foldl' (acc: name: acc // { "${name}" = (acc.${name} or 0) + 1; }) {} names;
       duplicateNames = lib.attrNames (lib.filterAttrs (_: v: v > 1) nameCounts);
-      copySkillsWithoutSource = lib.filter (s: s.mode == "copy" && s.source == null) cfg.skills;
+      copySkillsWithoutSource = lib.filter (s: s.mode == "copy" && s.source == null) inlineSkills;
     in
       (if duplicateNames == [] then [] else [
         {
@@ -100,25 +115,33 @@ EOF
       ++ (map (s: {
         assertion = false;
         message = "services.openclaw.skills: skill '${s.name}' uses copy mode but has no source.";
-      }) copySkillsWithoutSource);
+      }) copySkillsWithoutSource)
+      ++ secretAssertions;
 
   # Build skill derivations for each instance
   # Returns: { "<instanceName>" = [ { path = "skills/<name>"; drv = <derivation>; } ... ]; }
   skillDerivations =
     lib.mapAttrs (instName: instCfg:
-      map (skill:
-        let
-          skillDrv = if skill.mode == "inline" then
-            pkgs.writeTextDir "SKILL.md" (renderSkill skill)
-          else
-            # copy mode - use the source directly
-            skill.source;
-        in {
-          path = "skills/${skill.name}";
-          drv = skillDrv;
-          mode = skill.mode;
-        }
-      ) cfg.skills
+      let
+        drvEntries = map (skill: {
+          path = "skills/${skill.skillName}";
+          drv = skill;
+          mode = "copy";
+        }) drvSkills;
+        inlineEntries = map (skill:
+          let
+            skillDrv = if skill.mode == "inline" then
+              pkgs.writeTextDir "SKILL.md" (renderSkill skill)
+            else
+              # copy mode - use the source directly
+              skill.source;
+          in {
+            path = "skills/${skill.name}";
+            drv = skillDrv;
+            mode = skill.mode;
+          }
+        ) inlineSkills;
+      in drvEntries ++ inlineEntries
     ) instanceConfigs;
 
   # Build documents derivations for each instance
@@ -157,5 +180,5 @@ EOF
       lib.flatten (lib.mapAttrsToList rulesForInstance instanceConfigs);
 
 in {
-  inherit documentsAssertions skillAssertions tmpfilesRules;
+  inherit documentsAssertions skillAssertions tmpfilesRules drvSkills;
 }

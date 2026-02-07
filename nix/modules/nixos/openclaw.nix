@@ -104,11 +104,20 @@ let
     };
   };
 
+  # Partition skills (needed before mkInstanceConfig for tool extraction)
+  isSkillDrv = s: s ? isOpenclawSkill && s.isOpenclawSkill;
+  drvSkills = lib.filter isSkillDrv cfg.skills;
+
   # Build instance configuration
   mkInstanceConfig = name: inst:
     let
       gatewayPackage = inst.package;
       oauthTokenFile = inst.providers.anthropic.oauthTokenFile;
+
+      # Skill library: extract tools, env, secrets from derivation-based skills
+      skillToolPackages = lib.flatten (map (s: s.tools or []) drvSkills);
+      skillEnv = lib.foldl' (acc: s: acc // (s.env or {})) {} drvSkills;
+      skillSecrets = lib.foldl' (acc: s: acc // (s.secrets or {})) {} drvSkills;
 
       baseConfig = mkBaseConfig inst.workspaceDir inst;
       mergedConfig = lib.recursiveUpdate
@@ -180,6 +189,19 @@ let
           exit 1
         fi
         ''}
+
+        # Skill library: tools on PATH
+        ${lib.optionalString (skillToolPackages != []) ''
+        export PATH="${lib.makeBinPath skillToolPackages}:$PATH"
+        ''}
+
+        # Skill library: plain env vars
+        ${lib.concatStringsSep "\n" (lib.mapAttrsToList (k: v: "export ${k}=\"${v}\"") skillEnv)}
+
+        # Skill library: secrets (read from files at runtime)
+        ${lib.concatStringsSep "\n" (lib.mapAttrsToList (k: v: ''
+        ${k}="$(cat "${v}")"
+        export ${k}'') skillSecrets)}
 
         exec "${gatewayPackage}/bin/openclaw" "$@"
       '';

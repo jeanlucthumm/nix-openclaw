@@ -242,7 +242,7 @@ in {
     };
 
     skills = lib.mkOption {
-      type = lib.types.listOf (lib.types.submodule {
+      type = lib.types.listOf (lib.types.either lib.types.package (lib.types.submodule {
         options = {
           name = lib.mkOption {
             type = lib.types.str;
@@ -279,9 +279,13 @@ in {
             description = "Source path for the skill (required for copy mode).";
           };
         };
-      });
+      }));
       default = [];
-      description = "Declarative skills installed into workspace.";
+      description = ''
+        Declarative skills installed into workspace.
+        Accepts mkSkill derivations (from the skills library) and/or
+        inline submodule attrsets (existing format).
+      '';
     };
 
     plugins = lib.mkOption {

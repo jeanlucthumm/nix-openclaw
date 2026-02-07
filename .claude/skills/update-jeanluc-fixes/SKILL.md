@@ -20,9 +20,9 @@ Update openclaw-source.nix to the latest commit from jeanlucthumm/openclaw jeanl
 3. Update `nix/sources/openclaw-source.nix`:
    - Set `rev` to the new commit SHA
    - Set `hash` to the new hash from step 2
-   - For `pnpmDepsHash`: set to a fake hash like `sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=`
+   - Keep `pnpmDepsHash` the same (it only changes when pnpm-lock.yaml changes)
 
-4. Build to get the correct pnpmDepsHash:
+4. Build to verify (and get correct pnpmDepsHash if it changed):
    ```bash
    nix build .#openclaw-gateway
    ```

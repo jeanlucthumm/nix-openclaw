@@ -6,6 +6,97 @@
 >
 > <sub>Questions? Join the Openclaw Discord and ask in **#golden-path-deployments**: https://discord.com/channels/1456350064065904867/1457003026412736537</sub>
 
+---
+
+## What This Fork Adds
+
+This fork builds on top of the base nix-openclaw package. Here's what's different:
+
+### Skills Library
+
+The base package has two ways to add capabilities: inline skills (no tools) or full plugin flakes (overkill when the tool already exists in nixpkgs). The skills library fills the gap.
+
+**Pick skills from a catalog. Tools get installed automatically.**
+
+```nix
+{ nix-openclaw, ... }:
+let
+  skills = nix-openclaw.skills.${system};
+in {
+  programs.openclaw.skills = [
+    skills.github       # installs gh
+    skills.tmux         # installs tmux
+    skills.weather      # installs curl
+    skills.session-logs # installs jq + ripgrep
+  ];
+}
+```
+
+That's it. Each skill bundles the right Nix packages. `home-manager switch` puts the tools on PATH and teaches the AI how to use them.
+
+**Need a skill from GitHub?**
+
+```nix
+{ nix-openclaw, pkgs, ... }:
+let
+  oc = nix-openclaw.lib.${system};
+in {
+  programs.openclaw.skills = [
+    (oc.fromGitHub {
+      owner = "someone";
+      repo = "cool-skills";
+      skillPath = "skills/cool-thing";
+      rev = "abc123";
+      hash = "sha256-...";
+      tools = [ pkgs.nodejs ];
+    })
+  ];
+}
+```
+
+**Need full control?**
+
+```nix
+(oc.mkSkill {
+  src = ./my-skills/custom;
+  tools = [ pkgs.ripgrep pkgs.jq ];
+  env = { OUTPUT_FORMAT = "json"; };
+  secrets = {
+    MY_API_KEY = "/run/agenix/my-api-key";  # read from file at runtime, never in nix store
+  };
+})
+```
+
+**Available catalog skills:**
+
+| Skill | Tools installed |
+|-------|----------------|
+| `github` | `gh` |
+| `tmux` | `tmux` |
+| `weather` | `curl` |
+| `session-logs` | `jq`, `ripgrep` |
+| `video-frames` | `ffmpeg` |
+| `himalaya` | `himalaya` |
+| `_1password` | `_1password-cli` |
+| `canvas` | *(none — teaching only)* |
+| `coding-agent` | *(none — teaching only)* |
+| `healthcheck` | *(none — teaching only)* |
+| `skill-creator` | *(none — teaching only)* |
+
+More coming as tool mappings are verified. You can always use `mkSkill` or `fromGitHub` for anything not in the catalog.
+
+### NixOS Module
+
+Full NixOS system service support with systemd hardening. Run Openclaw as an isolated system user instead of a Home Manager user service.
+
+### Other Fixes
+
+- Upstream pin tracks `jeanluc-fixes` branch with curated patches
+- Skills library works with both Home Manager and NixOS modules
+- Secrets never touch the Nix store (file paths only, read at runtime)
+
+---
+
 ## Contributions (read this first)
 
 We’re **not accepting PRs** right now. Not because we don’t value your help — the opposite. This is key infra and still stabilizing, and async PR review is too slow.
@@ -16,6 +107,7 @@ If you’re **not listed as a maintainer** (see [AGENTS.md#maintainers](AGENTS.m
 
 ## Table of Contents
 
+- [What This Fork Adds](#what-this-fork-adds)
 - [Contributions (read this first)](#contributions-read-this-first)
 - [What You Get](#what-you-get)
 - [Requirements](#requirements)
@@ -241,6 +333,8 @@ All state lives in `~/.openclaw/`. Logs at `/tmp/openclaw/openclaw-gateway.log`.
 > **Note:** Complete the [Quick Start](#quick-start) first to get Openclaw running. Then come back here to add plugins.
 
 Plugins extend what Openclaw can do. Each plugin bundles tools and teaches the AI how to use them.
+
+> **Tip:** For most use cases, the [Skills Library](#skills-library) is simpler than writing a full plugin. Use plugins when you need custom build logic or non-nixpkgs tools.
 
 ### First-party plugins
 

@@ -39,6 +39,9 @@ The primitive. Takes a skill source + Nix tool packages, produces a derivation.
 mkSkill {
   src = ./my-skill;           # dir containing SKILL.md
   tools = [ pkgs.gh ];        # Nix packages to put on PATH
+  env = {                     # optional: env vars exported in gateway wrapper
+    GITHUB_TOKEN_FILE = "/run/agenix/github-token";
+  };
   overrides = {               # optional: patch frontmatter fields
     description = "Updated";
   };
@@ -49,6 +52,7 @@ Output: a derivation where `$out/` is a valid AgentSkills directory (`SKILL.md`,
 
 Passthru attributes:
 - `.tools` — the package list (so the module can extract them for PATH)
+- `.env` — env var attrset (so the module can export them in the gateway wrapper)
 - `.skillName` — resolved name
 - `.isOpenclawSkill = true` — type tag
 
@@ -60,17 +64,18 @@ If `overrides` is non-empty, a build-time script patches the YAML frontmatter. I
 
 #### `fromBundled`
 
-Uses the already-pinned openclaw source. No extra network fetch.
+Uses the already-pinned openclaw source. No extra network fetch. Thin wrapper around `mkSkill` that sets `src` to the bundled skill path.
 
 ```nix
 fromBundled {
   name = "github";         # dir name under openclaw's skills/
-  extraTools = [];          # additional packages beyond auto-resolved
-  overrides = {};           # frontmatter patches
+  tools = [ pkgs.gh ];     # explicit tool list
+  env = {};                # optional env vars
+  overrides = {};          # frontmatter patches
 }
 ```
 
-Resolves `requires.bins` from the SKILL.md via `binToNixPkg` mapping. This is the workhorse for the pre-packaged catalog.
+Tool lists are explicit — no eval-time YAML/JSON5 parsing. The catalog knows what each skill needs.
 
 #### `fromGitHub`
 
@@ -109,41 +114,22 @@ nix-openclaw.skills.${system}.github     # → mkSkill derivation
 nix-openclaw.skills.${system}.summarize  # → mkSkill derivation
 ```
 
-Each catalog entry is trivial:
+Each catalog entry is explicit about its tools:
 
 ```nix
-github = fromBundled { name = "github"; };
-tmux = fromBundled { name = "tmux"; };
-weather = fromBundled { name = "weather"; };
-```
+github = fromBundled { name = "github"; tools = [ pkgs.gh ]; };
+tmux = fromBundled { name = "tmux"; tools = [ pkgs.tmux ]; };
+weather = fromBundled { name = "weather"; tools = [ pkgs.curl ]; };
 
-The `binToNixPkg` mapping does the heavy lifting of resolving `requires.bins` to nixpkgs attributes.
+# Skills needing secrets declare env (user overrides the values):
+goplaces = fromBundled {
+  name = "local-places";
+  tools = [ pkgs.goplaces ];
+  env = { GOOGLE_PLACES_API_KEY = null; };  # must be overridden
+};
+```
 
 **Location:** `nix/lib/skill-catalog.nix`
-
-### `binToNixPkg` Mapping
-
-A simple attrset mapping binary names to Nix packages:
-
-```nix
-{
-  gh = pkgs.gh;
-  jq = pkgs.jq;
-  curl = pkgs.curl;
-  rg = pkgs.ripgrep;
-  tmux = pkgs.tmux;
-  ffmpeg = pkgs.ffmpeg;
-  uv = pkgs.uv;
-  # ...
-  # null = not in nixpkgs, skipped with warning
-  clawhub = null;
-  memo = null;
-}
-```
-
-Grows over time. Tools mapped to `null` are skipped — the skill still loads, the tool is just the user's responsibility.
-
-**Location:** `nix/lib/binToNixPkg.nix`
 
 ---
 
@@ -178,14 +164,18 @@ Derivation skills get symlinked directly. Inline skills use existing `renderSkil
 
 **File:** `nix/modules/home-manager/openclaw/files.nix`
 
-### Tool Extraction
+### Tool + Env Extraction
 
-`config.nix` extracts `.tools` from derivation skills and adds them to the gateway wrapper PATH alongside plugin tools:
+`config.nix` extracts `.tools` and `.env` from derivation skills and adds them to the gateway wrapper:
 
 ```nix
 skillToolPackages = lib.flatten (map (s: s.tools or []) drvSkills);
+skillEnvVars = lib.foldl' (acc: s: acc // (s.env or {})) {} drvSkills;
 allExtraPackages = pluginPackages ++ skillToolPackages;
+allEnvVars = pluginEnvVars // skillEnvVars;
 ```
+
+Env vars with `null` values trigger a build-time assertion failure — the user must provide a value. This replaces the old `requiredEnv` pattern with something more direct: declare the var on the skill, override the value in your config.
 
 **File:** `nix/modules/home-manager/openclaw/config.nix`
 
@@ -203,7 +193,6 @@ skills = skillLib.catalog;           # attrset of skill derivations
 lib.mkSkill = skillLib.mkSkill;
 lib.fromBundled = skillLib.fromBundled;
 lib.fromGitHub = skillLib.fromGitHub;
-lib.binToNixPkg = skillLib.binToNixPkg;
 ```
 
 ---
@@ -216,18 +205,17 @@ nix/
     default.nix                 # exports everything
     mkSkill.nix                 # builder
     fetchers.nix                # fromBundled, fromGitHub, fromClawHub
-    binToNixPkg.nix             # binary → package mapping
-    skill-catalog.nix           # pre-packaged skills
+    skill-catalog.nix           # pre-packaged skills with explicit tool lists
   scripts/
     patch-skill-frontmatter.py  # NEW: build-time frontmatter patcher
   modules/
     home-manager/openclaw/
-      options.nix               # MODIFIED
-      files.nix                 # MODIFIED
-      config.nix                # MODIFIED
+      options.nix               # MODIFIED: skills type accepts derivations
+      files.nix                 # MODIFIED: partition drv vs inline skills
+      config.nix                # MODIFIED: extract .tools + .env from skills
     nixos/
-      options.nix               # MODIFIED
-      documents-skills.nix      # MODIFIED
+      options.nix               # MODIFIED: skills type accepts derivations
+      documents-skills.nix      # MODIFIED: partition drv vs inline skills
 ```
 
 ---
@@ -236,37 +224,33 @@ nix/
 
 ### Chunk 1: `mkSkill` + frontmatter patcher
 
-Create `nix/lib/mkSkill.nix` and `nix/scripts/patch-skill-frontmatter.py`. The builder copies `src`, optionally patches frontmatter, attaches passthru. Test by building a skill from a local directory.
+Create `nix/lib/mkSkill.nix` and `nix/scripts/patch-skill-frontmatter.py`. The builder copies `src`, optionally patches frontmatter, attaches passthru (`.tools`, `.env`, `.skillName`, `.isOpenclawSkill`). Test by building a skill from a local directory.
 
-### Chunk 2: `binToNixPkg` mapping
+### Chunk 2: Fetchers (`fromBundled`, `fromGitHub`)
 
-Create `nix/lib/binToNixPkg.nix`. Map all binary names from the 52 bundled skills to nixpkgs attributes (or null). Standalone attrset, no deps.
+Create `nix/lib/fetchers.nix`. `fromBundled` is a thin wrapper setting `src` to the pinned openclaw source path. `fromGitHub` fetches and extracts a skill subdirectory. Both delegate to `mkSkill`.
 
-### Chunk 3: `fromBundled` fetcher
+### Chunk 3: Skill catalog
 
-Create `nix/lib/fetchers.nix`. Uses pinned openclaw source + `binToNixPkg` to resolve tools automatically. Also includes `fromGitHub`.
+Create `nix/lib/skill-catalog.nix`. Call `fromBundled` for each of the 52 bundled skills with explicit tool lists.
 
-### Chunk 4: Skill catalog
-
-Create `nix/lib/skill-catalog.nix`. Call `fromBundled` for each of the 52 bundled skills.
-
-### Chunk 5: Library entrypoint + flake outputs
+### Chunk 4: Library entrypoint + flake outputs
 
 Create `nix/lib/default.nix`. Modify `flake.nix` to expose `skills` and `lib` outputs.
 
-### Chunk 6: Home Manager module integration
+### Chunk 5: Home Manager module integration
 
-Modify `options.nix`, `files.nix`, `config.nix` to accept and handle skill derivations.
+Modify `options.nix`, `files.nix`, `config.nix` to accept skill derivations alongside inline submodules. Extract `.tools` for PATH and `.env` for gateway wrapper exports. Null env values trigger assertion failure.
 
-### Chunk 7: NixOS module integration
+### Chunk 6: NixOS module integration
 
 Same changes applied to the NixOS module.
 
-### Chunk 8: `fromClawHub` (deferred)
+### Chunk 7: `fromClawHub` (deferred)
 
 Add ClawHub fetcher once the API is verified.
 
-### Chunk 9: Checks
+### Chunk 8: Checks
 
 Add `nix/checks/skill-library-test.nix` to verify catalog skills build. Wire into flake checks and `garnix.yaml`.
 
@@ -274,19 +258,20 @@ Add `nix/checks/skill-library-test.nix` to verify catalog skills build. Wire int
 
 ## Migration & Coexistence
 
-- **Existing plugins:** Untouched. Plugin system continues to work.
-- **Existing inline skills:** Untouched. The submodule format remains supported.
-- **First-party toggles:** Continue to work. Users can optionally migrate:
+- **Existing plugins:** Continue to work. Not removed, but no longer the recommended path for new skills.
+- **Existing inline skills:** Continue to work. The submodule format remains supported.
+- **First-party toggles:** Continue to work. Migration is straightforward:
 
 ```nix
-# Before:
+# Before (plugin system — resolves full flake, heavier):
 firstParty.summarize.enable = true;
 
-# After (lighter, no plugin flake resolution):
+# After (skill library — uses pinned source, lighter):
 skills = [ nix-openclaw.skills.${system}.summarize ];
 ```
 
 - **Name collisions:** If a skill derivation and a plugin provide the same skill name, Home Manager's file collision detection catches it at build time.
+- **Long-term direction:** The skill library is the single recommended extension system. Plugins remain for backward compatibility but new documentation and examples should use skills.
 
 ---
 
@@ -320,10 +305,15 @@ skills = [ nix-openclaw.skills.${system}.summarize ];
               config.channels.telegram = { /* ... */ };
 
               skills = [
-                # Pre-packaged (zero config)
+                # Pre-packaged (zero config — no secrets needed)
                 skills.github
                 skills.summarize
                 skills.tmux
+
+                # Pre-packaged with secrets
+                (skills.goplaces.override {
+                  env.GOOGLE_PLACES_API_KEY = config.sops.secrets.goplaces.path;
+                })
 
                 # From GitHub
                 (oc.fromGitHub {
@@ -332,13 +322,16 @@ skills = [ nix-openclaw.skills.${system}.summarize ];
                   skillPath = "skills/bankr";
                   rev = "abc123";
                   hash = "sha256-...";
-                  extraTools = [ pkgs.nodejs ];
+                  tools = [ pkgs.nodejs ];
                 })
 
                 # Full control
                 (oc.mkSkill {
                   src = ./my-skills/custom;
                   tools = [ pkgs.ripgrep pkgs.jq ];
+                  env = {
+                    MY_API_KEY = "/run/agenix/my-api-key";
+                  };
                 })
 
                 # Inline (existing format, still works)
@@ -358,10 +351,12 @@ skills = [ nix-openclaw.skills.${system}.summarize ];
 
 ---
 
-## Open Questions
+## Design Decisions (Resolved)
 
-1. **Frontmatter parsing at eval time:** `fromBundled` needs to read `requires.bins` from SKILL.md to auto-resolve tools. The metadata is JSON embedded in YAML frontmatter. Extractable with `builtins.readFile` + string manipulation + `builtins.fromJSON`, but fragile. Alternative: the catalog explicitly lists bin names instead of parsing. Leaning toward explicit lists — simpler, more reliable.
+1. **Explicit tool lists, no eval-time parsing.** The catalog explicitly declares which Nix packages each skill needs. No YAML/JSON5 frontmatter parsing at Nix eval time. Simpler, more reliable. The catalog IS the curated/verified layer — explicit tool mappings are the point.
 
-2. **Overlay integration:** Should the skill catalog be available via the overlay too, or just as a flake output? Flake output is simpler.
+2. **Flake output only, no overlay.** Skills are exposed as `nix-openclaw.skills.${system}.*`, not via the Nix overlay. Skills are a domain-specific concept, not general packages.
 
-3. **First-party plugin deprecation:** Should the `firstParty.*.enable` toggles eventually be deprecated in favor of the skill catalog? The skill catalog is lighter (no `builtins.getFlake`), but plugins can do more (stateDirs, requiredEnv validation, config.json). Probably keep both.
+3. **Single extension system.** Upstream Openclaw distinguishes "skills" (SKILL.md teaching docs) from "plugins" (TypeScript gateway extensions). nix-openclaw's `openclawPlugin` pattern is closer to a skill bundle than a real plugin. The skill library subsumes this: `mkSkill` handles tools, env vars, and skill content in one unit. The existing `openclawPlugin` system and `firstParty.*.enable` toggles continue to work but are no longer the recommended path. New capabilities should use the skill library.
+
+4. **Secrets via `env` on the skill.** Skills declare their env vars directly. Null values = required (build fails if not overridden). Non-null values = provided (exported in gateway wrapper). No separate `requiredEnv` mechanism. No `stateDirs` — dropped until there's a demonstrated need.

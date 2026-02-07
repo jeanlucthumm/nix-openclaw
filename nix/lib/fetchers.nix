@@ -42,6 +42,8 @@
     in
     mkSkill {
       inherit src tools env secrets overrides;
-      name = if name != null then name else builtins.baseNameOf skillPath;
+      name = if name != null then name
+        else if skillPath != "" then builtins.baseNameOf skillPath
+        else repo;
     };
 }

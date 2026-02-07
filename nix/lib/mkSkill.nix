@@ -47,12 +47,13 @@ pkgs.stdenvNoCC.mkDerivation {
   version = "0.1.0";
   inherit src;
 
-  secretCheck = builtins.deepSeq secretAssertions true;
   nativeBuildInputs = lib.optionals hasOverrides [ python3 ];
   dontConfigure = true;
   dontBuild = true;
 
   installPhase = ''
+    # Force evaluation of secret assertions (triggers throw if any secret is null)
+    : ${builtins.toString (builtins.deepSeq secretAssertions true)}
     runHook preInstall
     mkdir -p "$out"
     cp -r . "$out/"

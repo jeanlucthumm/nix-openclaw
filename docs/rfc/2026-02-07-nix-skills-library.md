@@ -39,8 +39,11 @@ The primitive. Takes a skill source + Nix tool packages, produces a derivation.
 mkSkill {
   src = ./my-skill;           # dir containing SKILL.md
   tools = [ pkgs.gh ];        # Nix packages to put on PATH
-  env = {                     # optional: env vars exported in gateway wrapper
-    GITHUB_TOKEN_FILE = "/run/agenix/github-token";
+  env = {                     # optional: plain env vars (safe for Nix store)
+    DEFAULT_BRANCH = "main";
+  };
+  secrets = {                 # optional: secret env vars (read from files at runtime)
+    GITHUB_TOKEN = "/run/agenix/github-token";
   };
   overrides = {               # optional: patch frontmatter fields
     description = "Updated";
@@ -52,9 +55,34 @@ Output: a derivation where `$out/` is a valid AgentSkills directory (`SKILL.md`,
 
 Passthru attributes:
 - `.tools` — the package list (so the module can extract them for PATH)
-- `.env` — env var attrset (so the module can export them in the gateway wrapper)
+- `.env` — plain env var attrset (exported directly in gateway wrapper)
+- `.secrets` — secret env var attrset (file paths; contents read into env vars at runtime)
 - `.skillName` — resolved name
 - `.isOpenclawSkill = true` — type tag
+
+### Environment & Secrets Model
+
+Two mechanisms for env vars:
+
+- **`env`** — plain key-value pairs, exported directly. Values end up in the Nix store (the gateway wrapper script). Use for non-sensitive configuration.
+- **`secrets`** — values are **file paths only**. The gateway wrapper reads file contents into env vars at runtime. Secrets never touch the Nix store.
+
+```bash
+# From env:
+export DEFAULT_BRANCH="main"
+
+# From secrets:
+GITHUB_TOKEN="$(cat "/run/agenix/github-token")"
+export GITHUB_TOKEN
+```
+
+Secrets work with any secrets manager:
+
+- **agenix**: `age.secrets.github-token.owner = "openclaw";`
+- **sops-nix**: `sops.secrets.github-token = {};`
+- **Plain files**: `echo "ghp_abc123" > ~/.secrets/github-token && chmod 600 ~/.secrets/github-token`
+
+Null values in `secrets` trigger a build-time assertion — the user must provide a path.
 
 If `overrides` is non-empty, a build-time script patches the YAML frontmatter. If empty, it's a plain copy.
 
@@ -70,7 +98,8 @@ Uses the already-pinned openclaw source. No extra network fetch. Thin wrapper ar
 fromBundled {
   name = "github";         # dir name under openclaw's skills/
   tools = [ pkgs.gh ];     # explicit tool list
-  env = {};                # optional env vars
+  env = {};                # optional plain env vars
+  secrets = {};            # optional secrets (file paths)
   overrides = {};          # frontmatter patches
 }
 ```
@@ -121,11 +150,11 @@ github = fromBundled { name = "github"; tools = [ pkgs.gh ]; };
 tmux = fromBundled { name = "tmux"; tools = [ pkgs.tmux ]; };
 weather = fromBundled { name = "weather"; tools = [ pkgs.curl ]; };
 
-# Skills needing secrets declare env (user overrides the values):
+# Skills needing secrets declare them (user overrides the values):
 goplaces = fromBundled {
   name = "local-places";
   tools = [ pkgs.goplaces ];
-  env = { GOOGLE_PLACES_API_KEY = null; };  # must be overridden
+  secrets = { GOOGLE_PLACES_API_KEY = null; };  # must be overridden
 };
 ```
 
@@ -164,18 +193,29 @@ Derivation skills get symlinked directly. Inline skills use existing `renderSkil
 
 **File:** `nix/modules/home-manager/openclaw/files.nix`
 
-### Tool + Env Extraction
+### Tool + Env + Secrets Extraction
 
-`config.nix` extracts `.tools` and `.env` from derivation skills and adds them to the gateway wrapper:
+`config.nix` extracts `.tools`, `.env`, and `.secrets` from derivation skills and wires them into the gateway wrapper:
 
 ```nix
 skillToolPackages = lib.flatten (map (s: s.tools or []) drvSkills);
-skillEnvVars = lib.foldl' (acc: s: acc // (s.env or {})) {} drvSkills;
+skillEnv = lib.foldl' (acc: s: acc // (s.env or {})) {} drvSkills;
+skillSecrets = lib.foldl' (acc: s: acc // (s.secrets or {})) {} drvSkills;
 allExtraPackages = pluginPackages ++ skillToolPackages;
-allEnvVars = pluginEnvVars // skillEnvVars;
 ```
 
-Env vars with `null` values trigger a build-time assertion failure — the user must provide a value. This replaces the old `requiredEnv` pattern with something more direct: declare the var on the skill, override the value in your config.
+The gateway wrapper exports `env` values directly and reads `secrets` from files:
+
+```bash
+# Plain env
+export DEFAULT_BRANCH="main"
+
+# Secrets
+GITHUB_TOKEN="$(cat "/run/agenix/github-token")"
+export GITHUB_TOKEN
+```
+
+Secrets with `null` values trigger a build-time assertion — the user must provide a file path. This replaces the old `requiredEnv` pattern.
 
 **File:** `nix/modules/home-manager/openclaw/config.nix`
 
@@ -212,7 +252,7 @@ nix/
     home-manager/openclaw/
       options.nix               # MODIFIED: skills type accepts derivations
       files.nix                 # MODIFIED: partition drv vs inline skills
-      config.nix                # MODIFIED: extract .tools + .env from skills
+      config.nix                # MODIFIED: extract .tools + .env + .secrets from skills
     nixos/
       options.nix               # MODIFIED: skills type accepts derivations
       documents-skills.nix      # MODIFIED: partition drv vs inline skills
@@ -224,7 +264,7 @@ nix/
 
 ### Chunk 1: `mkSkill` + frontmatter patcher
 
-Create `nix/lib/mkSkill.nix` and `nix/scripts/patch-skill-frontmatter.py`. The builder copies `src`, optionally patches frontmatter, attaches passthru (`.tools`, `.env`, `.skillName`, `.isOpenclawSkill`). Test by building a skill from a local directory.
+Create `nix/lib/mkSkill.nix` and `nix/scripts/patch-skill-frontmatter.py`. The builder copies `src`, optionally patches frontmatter, attaches passthru (`.tools`, `.env`, `.secrets`, `.skillName`, `.isOpenclawSkill`). Test by building a skill from a local directory.
 
 ### Chunk 2: Fetchers (`fromBundled`, `fromGitHub`)
 
@@ -240,7 +280,7 @@ Create `nix/lib/default.nix`. Modify `flake.nix` to expose `skills` and `lib` ou
 
 ### Chunk 5: Home Manager module integration
 
-Modify `options.nix`, `files.nix`, `config.nix` to accept skill derivations alongside inline submodules. Extract `.tools` for PATH and `.env` for gateway wrapper exports. Null env values trigger assertion failure.
+Modify `options.nix`, `files.nix`, `config.nix` to accept skill derivations alongside inline submodules. Extract `.tools` for PATH, `.env` for direct exports, `.secrets` for file-based exports. Null secrets trigger assertion failure.
 
 ### Chunk 6: NixOS module integration
 
@@ -312,7 +352,7 @@ skills = [ nix-openclaw.skills.${system}.summarize ];
 
                 # Pre-packaged with secrets
                 (skills.goplaces.override {
-                  env.GOOGLE_PLACES_API_KEY = config.sops.secrets.goplaces.path;
+                  secrets.GOOGLE_PLACES_API_KEY = config.sops.secrets.goplaces.path;
                 })
 
                 # From GitHub
@@ -329,7 +369,8 @@ skills = [ nix-openclaw.skills.${system}.summarize ];
                 (oc.mkSkill {
                   src = ./my-skills/custom;
                   tools = [ pkgs.ripgrep pkgs.jq ];
-                  env = {
+                  env = { OUTPUT_FORMAT = "json"; };
+                  secrets = {
                     MY_API_KEY = "/run/agenix/my-api-key";
                   };
                 })
@@ -359,4 +400,4 @@ skills = [ nix-openclaw.skills.${system}.summarize ];
 
 3. **Single extension system.** Upstream Openclaw distinguishes "skills" (SKILL.md teaching docs) from "plugins" (TypeScript gateway extensions). nix-openclaw's `openclawPlugin` pattern is closer to a skill bundle than a real plugin. The skill library subsumes this: `mkSkill` handles tools, env vars, and skill content in one unit. The existing `openclawPlugin` system and `firstParty.*.enable` toggles continue to work but are no longer the recommended path. New capabilities should use the skill library.
 
-4. **Secrets via `env` on the skill.** Skills declare their env vars directly. Null values = required (build fails if not overridden). Non-null values = provided (exported in gateway wrapper). No separate `requiredEnv` mechanism. No `stateDirs` — dropped until there's a demonstrated need.
+4. **Two-tier env model.** `env` for plain config (exported directly, safe in Nix store). `secrets` for sensitive values (file paths only, read at runtime, never in Nix store). Null values in `secrets` = required (build fails if not overridden). No separate `requiredEnv` mechanism. No `stateDirs` — dropped until there's a demonstrated need.

@@ -296,6 +296,23 @@ Add `nix/checks/skill-library-test.nix` to verify catalog skills build. Wire int
 
 ---
 
+## Testing Strategy
+
+Checks are added incrementally — each chunk gets a check alongside the code, not deferred to the end. Existing check infrastructure lives in `nix/checks/` and is wired into `flake.nix` under `checks.${system}.*`.
+
+| Chunk | Validation |
+|---|---|
+| 1: `mkSkill` | `nix build .#checks.x86_64-linux.skill-mkSkill` — build a test skill from a local dir, verify `$out/SKILL.md` exists, passthru attrs (`.tools`, `.env`, `.secrets`, `.skillName`, `.isOpenclawSkill`) are correct. Test frontmatter patching via `overrides`. |
+| 2: Fetchers | `nix build .#checks.x86_64-linux.skill-fromBundled` — build a bundled skill (e.g. `github`), verify SKILL.md present and tools list correct. Test `fromGitHub` with a pinned rev. |
+| 3: Catalog | `nix build .#checks.x86_64-linux.skill-catalog` — build a subset of catalog entries, verify they all produce valid skill directories. |
+| 4: Flake outputs | `nix eval .#skills.x86_64-linux --apply builtins.attrNames` — verify outputs exist and are well-formed. |
+| 5: HM module | Extend existing `hm-activation` check (`nix/checks/openclaw-hm-activation.nix`) to include skill derivations in the test config. Verify activation succeeds, skills land in `workspace/skills/`, gateway wrapper has correct PATH and env exports. |
+| 6: NixOS module | Extend existing `nixos-module` check (`nix/checks/nixos-module-test.nix`) similarly. |
+
+Run `nix flake check` after each chunk to catch regressions against the full suite.
+
+---
+
 ## Migration & Coexistence
 
 - **Existing plugins:** Continue to work. Not removed, but no longer the recommended path for new skills.

@@ -73,17 +73,30 @@ let
         inst.package;
     pluginPackages = plugins.pluginPackagesFor name;
     pluginEnvAll = plugins.pluginEnvAllFor name;
+
+    # Skill library: extract tools, env, secrets from derivation-based skills
+    skillToolPackages = lib.flatten (map (s: s.tools or []) files.drvSkills);
+    skillEnv = lib.foldl' (acc: s: acc // (s.env or {})) {} files.drvSkills;
+    skillSecrets = lib.foldl' (acc: s: acc // (s.secrets or {})) {} files.drvSkills;
+    allExtraPackages = pluginPackages ++ skillToolPackages;
+
     mergedConfig = stripNulls (lib.recursiveUpdate (lib.recursiveUpdate baseConfig cfg.config) inst.config);
     configJson = builtins.toJSON mergedConfig;
     configFile = pkgs.writeText "openclaw-${name}.json" configJson;
     gatewayWrapper = pkgs.writeShellScriptBin "openclaw-gateway-${name}" ''
       set -euo pipefail
 
-      if [ -n "${lib.makeBinPath pluginPackages}" ]; then
-        export PATH="${lib.makeBinPath pluginPackages}:$PATH"
+      if [ -n "${lib.makeBinPath allExtraPackages}" ]; then
+        export PATH="${lib.makeBinPath allExtraPackages}:$PATH"
       fi
 
       ${lib.concatStringsSep "\n" (map (entry: "export ${entry.key}=\"${entry.value}\"") pluginEnvAll)}
+
+      ${lib.concatStringsSep "\n" (lib.mapAttrsToList (k: v: "export ${k}=\"${v}\"") skillEnv)}
+
+      ${lib.concatStringsSep "\n" (lib.mapAttrsToList (k: v: ''
+      ${k}="$(cat "${v}")"
+      export ${k}'') skillSecrets)}
 
       exec "${gatewayPackage}/bin/openclaw" "$@"
     '';
@@ -200,6 +213,7 @@ in {
     home.packages = lib.unique (
       (map (item: item.package) instanceConfigs)
       ++ (lib.optionals cfg.exposePluginPackages plugins.pluginPackagesAll)
+      ++ (lib.flatten (map (s: s.tools or []) files.drvSkills))
     );
 
     home.file =

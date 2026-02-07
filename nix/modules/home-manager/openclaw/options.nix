@@ -95,9 +95,13 @@ in {
     };
 
     skills = lib.mkOption {
-      type = lib.types.listOf mkSkillOption;
+      type = lib.types.listOf (lib.types.either lib.types.package mkSkillOption);
       default = [];
-      description = "Declarative skills installed into each instance workspace.";
+      description = ''
+        Declarative skills installed into each instance workspace.
+        Accepts mkSkill derivations (from the skills library) and/or
+        inline submodule attrsets (existing format).
+      '';
     };
 
     plugins = lib.mkOption {

@@ -26,25 +26,52 @@ let
     in
       "${frontmatter}\n\n${body}\n";
 
+  # Partition skills into derivation-based (from skill library) and inline (submodule)
+  isSkillDrv = s: s ? isOpenclawSkill && s.isOpenclawSkill;
+  drvSkills = lib.filter isSkillDrv cfg.skills;
+  inlineSkills = lib.filter (s: !(isSkillDrv s)) cfg.skills;
+
+  # Secret assertions: null secrets in skill derivations must fail
+  secretAssertions = lib.flatten (map (s:
+    let nullSecrets = lib.attrNames (lib.filterAttrs (_: v: v == null) (s.secrets or {}));
+    in map (name: {
+      assertion = false;
+      message = "programs.openclaw.skills: skill '${s.skillName}' has null secret '${name}' — provide a file path.";
+    }) nullSecrets
+  ) drvSkills);
+
   skillAssertions =
     let
-      names = map (skill: skill.name) cfg.skills;
+      drvNames = map (s: s.skillName) drvSkills;
+      inlineNames = map (s: s.name) inlineSkills;
+      names = drvNames ++ inlineNames;
       nameCounts = lib.foldl' (acc: name: acc // { "${name}" = (acc.${name} or 0) + 1; }) {} names;
       duplicateNames = lib.attrNames (lib.filterAttrs (_: v: v > 1) nameCounts);
     in
-      if duplicateNames == [] then [] else [
+      (if duplicateNames == [] then [] else [
         {
           assertion = false;
           message = "programs.openclaw.skills has duplicate names: ${lib.concatStringsSep ", " duplicateNames}";
         }
-      ];
+      ]) ++ secretAssertions;
 
   skillFiles =
     let
       entriesForInstance = instName: inst:
         let
           base = "${toRelative (resolvePath inst.workspaceDir)}/skills";
-          entryFor = skill:
+
+          # Derivation skills: symlink from the nix store
+          drvEntryFor = skill: {
+            name = "${base}/${skill.skillName}";
+            value = {
+              source = "${skill}";
+              recursive = true;
+            };
+          };
+
+          # Inline/submodule skills: existing logic
+          inlineEntryFor = skill:
             let
               mode = skill.mode or "symlink";
               source = if skill ? source && skill.source != null then resolvePath skill.source else null;
@@ -74,7 +101,7 @@ let
                   };
                 };
         in
-          map entryFor cfg.skills;
+          (map drvEntryFor drvSkills) ++ (map inlineEntryFor inlineSkills);
     in
       lib.listToAttrs (lib.flatten (lib.mapAttrsToList entriesForInstance enabledInstances));
 
@@ -223,5 +250,6 @@ in {
     documentsGuard
     documentsFiles
     skillAssertions
-    skillFiles;
+    skillFiles
+    drvSkills;
 }

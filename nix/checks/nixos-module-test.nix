@@ -46,10 +46,11 @@ pkgs.testers.nixosTest {
       ];
     };
 
-    # Create dummy token files for testing
+    # Create dummy token files for testing (readable by openclaw user)
     system.activationScripts.openclawTestTokens = ''
       echo "test-oauth-token" > /run/openclaw-test-token
       echo "test-gateway-token" > /run/openclaw-gateway-token
+      chown openclaw:openclaw /run/openclaw-test-token /run/openclaw-gateway-token
       chmod 600 /run/openclaw-test-token /run/openclaw-gateway-token
     '';
 

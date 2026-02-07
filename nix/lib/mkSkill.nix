@@ -32,7 +32,7 @@ let
   hasOverrides = overrides != {};
 
   overrideArgs = lib.concatStringsSep " " (
-    lib.mapAttrsToList (k: v: "'${k}=${v}'") overrides
+    lib.mapAttrsToList (k: v: lib.escapeShellArg "${k}=${v}") overrides
   );
 
   # Assert that no secret has a null value (user must provide a file path)

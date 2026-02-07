@@ -2,7 +2,7 @@
 
 ## RFC
 
-[docs/rfc/2026-02-07-nix-skills-library.md](docs/rfc/2026-02-07-nix-skills-library.md)
+@docs/rfc/2026-02-07-nix-skills-library.md
 
 ## Summary
 

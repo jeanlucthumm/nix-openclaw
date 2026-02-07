@@ -36,10 +36,22 @@
           sourceInfo = sourceInfoStable;
           steipetePkgs = steipetePkgs;
         };
+        sourceFetch = pkgs.fetchFromGitHub (builtins.removeAttrs sourceInfoStable [ "pnpmDepsHash" ]);
+        lib = pkgs.lib;
+        skillLib = import ./nix/lib {
+          inherit lib pkgs;
+          openclawSrc = sourceFetch;
+        };
       in
       {
         packages = packageSetStable // {
           default = packageSetStable.openclaw;
+        };
+
+        skills = skillLib.catalog;
+
+        lib = {
+          inherit (skillLib) mkSkill fromBundled fromGitHub;
         };
 
         apps = {
@@ -53,6 +65,19 @@
           };
           config-validity = pkgs.callPackage ./nix/checks/openclaw-config-validity.nix {
             openclawGateway = packageSetStable.openclaw-gateway;
+          };
+          skill-mkSkill = import ./nix/checks/skill-mkSkill.nix {
+            inherit pkgs lib;
+            mkSkill = skillLib.mkSkill;
+          };
+          skill-fetchers = import ./nix/checks/skill-fetchers.nix {
+            inherit pkgs lib;
+            mkSkill = skillLib.mkSkill;
+            openclawSrc = sourceFetch;
+          };
+          skill-catalog = import ./nix/checks/skill-catalog.nix {
+            inherit pkgs lib;
+            catalog = skillLib.catalog;
           };
         } // (if pkgs.stdenv.hostPlatform.isLinux then {
           gateway-tests = pkgs.callPackage ./nix/checks/openclaw-gateway-tests.nix {

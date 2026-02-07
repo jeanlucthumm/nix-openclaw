@@ -196,11 +196,11 @@ let
         ''}
 
         # Skill library: plain env vars
-        ${lib.concatStringsSep "\n" (lib.mapAttrsToList (k: v: "export ${k}=\"${v}\"") skillEnv)}
+        ${lib.concatStringsSep "\n" (lib.mapAttrsToList (k: v: "export ${k}=${lib.escapeShellArg v}") skillEnv)}
 
         # Skill library: secrets (read from files at runtime)
         ${lib.concatStringsSep "\n" (lib.mapAttrsToList (k: v: ''
-        ${k}="$(cat "${v}")"
+        ${k}="$(cat ${lib.escapeShellArg v})"
         export ${k}'') skillSecrets)}
 
         exec "${gatewayPackage}/bin/openclaw" "$@"

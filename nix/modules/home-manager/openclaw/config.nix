@@ -92,10 +92,10 @@ let
 
       ${lib.concatStringsSep "\n" (map (entry: "export ${entry.key}=\"${entry.value}\"") pluginEnvAll)}
 
-      ${lib.concatStringsSep "\n" (lib.mapAttrsToList (k: v: "export ${k}=\"${v}\"") skillEnv)}
+      ${lib.concatStringsSep "\n" (lib.mapAttrsToList (k: v: "export ${k}=${lib.escapeShellArg v}") skillEnv)}
 
       ${lib.concatStringsSep "\n" (lib.mapAttrsToList (k: v: ''
-      ${k}="$(cat "${v}")"
+      ${k}="$(cat ${lib.escapeShellArg v})"
       export ${k}'') skillSecrets)}
 
       exec "${gatewayPackage}/bin/openclaw" "$@"

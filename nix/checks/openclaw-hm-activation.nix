@@ -3,6 +3,16 @@
 let
   openclawModule = ../modules/home-manager/openclaw.nix;
   testScript = builtins.readFile ../tests/hm-activation.py;
+  lib = pkgs.lib;
+
+  # Build a test skill derivation to exercise the skill library integration
+  mkSkill = import ../lib/mkSkill.nix { inherit lib pkgs; };
+  testSkill = mkSkill {
+    src = ../tests/fixtures/test-skill;
+    name = "hm-test-skill";
+    tools = [ pkgs.jq ];
+    env = { TEST_SKILL_VAR = "hello"; };
+  };
 
 in
 pkgs.testers.nixosTest {
@@ -37,6 +47,15 @@ pkgs.testers.nixosTest {
               enable = true;
               installApp = false;
               launchd.enable = false;
+              skills = [
+                testSkill
+                {
+                  name = "inline-test";
+                  description = "An inline test skill";
+                  body = "# Inline Test\nThis is inline.";
+                  mode = "inline";
+                }
+              ];
               instances.default = {
                 gatewayPort = 18999;
                 config = {

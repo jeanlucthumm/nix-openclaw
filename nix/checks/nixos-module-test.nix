@@ -11,6 +11,17 @@
 
 { pkgs, openclawModule }:
 
+let
+  lib = pkgs.lib;
+  mkSkill = import ../lib/mkSkill.nix { inherit lib pkgs; };
+  testSkill = mkSkill {
+    src = ../tests/fixtures/test-skill;
+    name = "nixos-test-skill";
+    tools = [ pkgs.jq ];
+    env = { NIXOS_TEST_VAR = "works"; };
+  };
+in
+
 pkgs.testers.nixosTest {
   name = "openclaw-nixos-module";
 
@@ -24,6 +35,15 @@ pkgs.testers.nixosTest {
       # Dummy token for testing - service won't be fully functional but will start
       providers.anthropic.oauthTokenFile = "/run/openclaw-test-token";
       gateway.auth.tokenFile = "/run/openclaw-gateway-token";
+      skills = [
+        testSkill
+        {
+          name = "inline-nixos-test";
+          description = "An inline NixOS test skill";
+          body = "# NixOS Inline Test";
+          mode = "inline";
+        }
+      ];
     };
 
     # Create dummy token files for testing
@@ -73,6 +93,15 @@ pkgs.testers.nixosTest {
             "sh -c 'test ! -e /home/testuser/secret.txt' || "
             "echo 'ProtectHome working: /home is hidden from service'"
         )
+
+    with subtest("Skill library: drv skill installed"):
+        server.succeed("test -d /var/lib/openclaw/workspace/skills/nixos-test-skill")
+
+    with subtest("Skill library: inline skill installed"):
+        server.succeed("test -d /var/lib/openclaw/workspace/skills/inline-nixos-test")
+
+    with subtest("Skill library: gateway wrapper has jq on PATH"):
+        server.succeed("cat $(which openclaw-gateway-default) | grep -q jq || cat /etc/systemd/system/openclaw-gateway.service | grep -q jq")
 
     with subtest("Service is running as openclaw user"):
         server.succeed(

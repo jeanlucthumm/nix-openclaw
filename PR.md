@@ -10,9 +10,10 @@
 
 ```nix
 skills = with nix-openclaw.skills.${system}; [
-  github      # bundles pkgs.gh
-  summarize   # bundles summarize CLI
-  tmux        # bundles pkgs.tmux
+  github       # bundles pkgs.gh
+  tmux         # bundles pkgs.tmux
+  weather      # bundles pkgs.curl
+  session-logs # bundles pkgs.jq + pkgs.ripgrep
 ];
 ```
 

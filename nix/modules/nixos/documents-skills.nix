@@ -162,12 +162,9 @@ EOF
       rulesForInstance = instName: instCfg:
         let
           workspaceDir = instCfg.workspaceDir;
-          skillRules = lib.flatten (map (entry:
-            if entry.mode == "inline" then
-              [ "C ${workspaceDir}/${entry.path} 0750 ${cfg.user} ${cfg.group} - ${entry.drv}" ]
-            else
-              [ "C ${workspaceDir}/${entry.path} 0750 ${cfg.user} ${cfg.group} - ${entry.drv}" ]
-          ) (skillDerivations.${instName} or []));
+          skillRules = map (entry:
+            "L+ ${workspaceDir}/${entry.path} - ${cfg.user} ${cfg.group} - ${entry.drv}"
+          ) (skillDerivations.${instName} or []);
           docRules = if documentsDerivations.${instName} == null then [] else
             let docs = documentsDerivations.${instName}; in [
               "C ${workspaceDir}/AGENTS.md 0640 ${cfg.user} ${cfg.group} - ${docs.agents}"

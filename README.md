@@ -14,9 +14,7 @@ This fork builds on top of the base nix-openclaw package. Here's what's differen
 
 ### Skills Library
 
-The base package has two ways to add capabilities: inline skills (no tools) or full plugin flakes (overkill when the tool already exists in nixpkgs). The skills library fills the gap.
-
-**Pick skills from a catalog. Tools get installed automatically.**
+Pick skills from a catalog. Nix installs the tools automatically.
 
 ```nix
 { nix-openclaw, ... }:
@@ -32,58 +30,16 @@ in {
 }
 ```
 
-That's it. Each skill bundles the right Nix packages. `home-manager switch` puts the tools on PATH and teaches the AI how to use them.
+That's it. `home-manager switch` puts the tools on PATH and teaches the AI how to use them. No plugin flake needed.
 
-**Need a skill from GitHub?**
+| Skill | Tools | Skill | Tools |
+|-------|-------|-------|-------|
+| `github` | `gh` | `video-frames` | `ffmpeg` |
+| `tmux` | `tmux` | `himalaya` | `himalaya` |
+| `weather` | `curl` | `_1password` | `_1password-cli` |
+| `session-logs` | `jq`, `ripgrep` | `canvas`, `coding-agent`, `healthcheck`, `skill-creator` | *(none)* |
 
-```nix
-{ nix-openclaw, pkgs, ... }:
-let
-  oc = nix-openclaw.lib.${system};
-in {
-  programs.openclaw.skills = [
-    (oc.fromGitHub {
-      owner = "someone";
-      repo = "cool-skills";
-      skillPath = "skills/cool-thing";
-      rev = "abc123";
-      hash = "sha256-...";
-      tools = [ pkgs.nodejs ];
-    })
-  ];
-}
-```
-
-**Need full control?**
-
-```nix
-(oc.mkSkill {
-  src = ./my-skills/custom;
-  tools = [ pkgs.ripgrep pkgs.jq ];
-  env = { OUTPUT_FORMAT = "json"; };
-  secrets = {
-    MY_API_KEY = "/run/agenix/my-api-key";  # read from file at runtime, never in nix store
-  };
-})
-```
-
-**Available catalog skills:**
-
-| Skill | Tools installed |
-|-------|----------------|
-| `github` | `gh` |
-| `tmux` | `tmux` |
-| `weather` | `curl` |
-| `session-logs` | `jq`, `ripgrep` |
-| `video-frames` | `ffmpeg` |
-| `himalaya` | `himalaya` |
-| `_1password` | `_1password-cli` |
-| `canvas` | *(none — teaching only)* |
-| `coding-agent` | *(none — teaching only)* |
-| `healthcheck` | *(none — teaching only)* |
-| `skill-creator` | *(none — teaching only)* |
-
-More coming as tool mappings are verified. You can always use `mkSkill` or `fromGitHub` for anything not in the catalog.
+You can also pull skills from GitHub repos, build custom skills with `mkSkill`, or mix skill derivations with inline skills. See **[Skills Library Reference](docs/skills-library.md)** for the full API.
 
 ### NixOS Module
 

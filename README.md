@@ -37,7 +37,8 @@ That's it. `home-manager switch` puts the tools on PATH and teaches the AI how t
 | `github` | `gh` | `video-frames` | `ffmpeg` |
 | `tmux` | `tmux` | `himalaya` | `himalaya` |
 | `weather` | `curl` | `_1password` | `_1password-cli` |
-| `session-logs` | `jq`, `ripgrep` | `canvas`, `coding-agent`, `healthcheck`, `skill-creator` | *(none)* |
+| `session-logs` | `jq`, `ripgrep` | `google-calendar` | `gcalcli` |
+| `canvas`, `coding-agent`, `healthcheck`, `skill-creator` | *(none)* | | |
 
 You can also pull skills from GitHub repos, build custom skills with `mkSkill`, or mix skill derivations with inline skills. See **[Skills Library Reference](docs/skills-library.md)** for the full API.
 

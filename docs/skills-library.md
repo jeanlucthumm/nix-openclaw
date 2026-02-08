@@ -85,6 +85,7 @@ Skills with clear nixpkgs tool mappings. More will be added as mappings are veri
 | `video-frames` | `ffmpeg` | Extract frames from video |
 | `himalaya` | `himalaya` | Email client |
 | `_1password` | `_1password-cli` | 1Password vault access |
+| `google-calendar` | `gcalcli` | Google Calendar (view, create, edit, delete events) |
 | `canvas` | *(none)* | Canvas drawing instructions |
 | `coding-agent` | *(none)* | Coding agent patterns |
 | `healthcheck` | *(none)* | System health checks |
@@ -109,6 +110,7 @@ mkSkill {
   secrets = {                 # secret env vars — file paths only (default: {})
     GITHUB_TOKEN = "/run/agenix/github-token";
   };
+  stateDir = "my-tool";       # writable state dir name (default: null)
   overrides = {               # patch YAML frontmatter fields (default: {})
     description = "Updated";
   };
@@ -124,6 +126,7 @@ mkSkill {
 | `.tools` | `[package]` | Packages for PATH |
 | `.env` | `{string}` | Plain env vars |
 | `.secrets` | `{string}` | Secret file paths |
+| `.stateDir` | `string?` | Writable state directory name (or `null`) |
 | `.skillName` | `string` | Resolved skill name |
 | `.isOpenclawSkill` | `bool` | Always `true` (type tag) |
 
@@ -139,6 +142,7 @@ fromBundled {
   tools = [ pkgs.gh ];       # (same args as mkSkill, minus src)
   env = {};
   secrets = {};
+  stateDir = null;
   overrides = {};
 }
 ```
@@ -158,6 +162,7 @@ fromGitHub {
   tools = [ pkgs.nodejs ];   # (same args as mkSkill, minus src)
   env = {};
   secrets = {};
+  stateDir = null;
   overrides = {};
 }
 ```
@@ -196,6 +201,34 @@ skills.goplaces  # has secrets.GOOGLE_PLACES_API_KEY = null
 ```
 
 Works with any secrets manager: agenix, sops-nix, plain files.
+
+---
+
+## State Directories
+
+Skills that need persistent writable state (OAuth tokens, caches, config files) can declare a `stateDir`. The modules create a writable directory at `workspace/.skill-state/<stateDir>/`.
+
+```nix
+mkSkill {
+  src = ./my-oauth-tool;
+  tools = [ pkgs.my-oauth-tool ];
+  stateDir = "my-oauth-tool";  # creates workspace/.skill-state/my-oauth-tool/
+}
+```
+
+The SKILL.md tells the agent to pass this path to the tool (e.g., `--config-folder workspace/.skill-state/my-oauth-tool/`). No env var injection needed — the agent knows the workspace root.
+
+**How it's created:**
+- **NixOS module**: `systemd-tmpfiles` rule (`d` type, owned by service user)
+- **Home Manager**: `mkdir -p` in the activation script
+
+**Example** — `google-calendar` uses this for gcalcli's OAuth tokens:
+
+```nix
+skills.google-calendar  # stateDir = "gcalcli", tools = [ gcalcli ]
+```
+
+After first setup (`gcalcli init`), the refresh token persists across service restarts and rebuilds because the state directory is outside the Nix store.
 
 ---
 
@@ -262,7 +295,9 @@ nix-openclaw.checks.${system}.skill-catalog        # catalog build tests
 
 ## Adding Skills to the Catalog
 
-To add a new skill to the catalog, edit `nix/lib/skill-catalog.nix`:
+To add a new skill to the catalog, edit `nix/lib/skill-catalog.nix`.
+
+**Upstream skill** (SKILL.md lives in the openclaw repo):
 
 ```nix
 my-new-skill = fromBundled {
@@ -270,5 +305,18 @@ my-new-skill = fromBundled {
   tools = [ pkgs.some-tool ]; # explicit — no magic, no YAML parsing
 };
 ```
+
+**Nix-native skill** (SKILL.md lives in `nix/skills/`):
+
+```nix
+my-new-skill = mkSkill {
+  src = ../skills/my-new-skill;
+  name = "my-new-skill";
+  tools = [ pkgs.some-tool ];
+  stateDir = "my-tool";       # if the tool needs writable state
+};
+```
+
+Use nix-native skills when the SKILL.md doesn't exist upstream, or when you need a custom teaching document for a nixpkgs tool.
 
 The tool list is explicit by design. The catalog is the curated/verified layer — we don't parse skill frontmatter at eval time.

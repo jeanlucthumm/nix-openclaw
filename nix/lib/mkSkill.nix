@@ -7,6 +7,7 @@
 #   .tools          — package list (for PATH in gateway wrapper)
 #   .env            — plain env var attrset (exported directly)
 #   .secrets        — secret env var attrset (file paths; read at runtime)
+#   .stateDir       — writable state directory name (created under workspace/.skill-state/)
 #   .skillName      — resolved name
 #   .isOpenclawSkill — type tag (always true)
 
@@ -16,6 +17,7 @@
 , tools ? []
 , env ? {}
 , secrets ? {}
+, stateDir ? null
 , overrides ? {}
 , name ? null
 }:
@@ -64,7 +66,7 @@ pkgs.stdenvNoCC.mkDerivation {
   '';
 
   passthru = {
-    inherit tools env secrets;
+    inherit tools env secrets stateDir;
     skillName = resolvedName;
     isOpenclawSkill = true;
   };

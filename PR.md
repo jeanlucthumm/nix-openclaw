@@ -70,3 +70,8 @@ Skills that need persistent writable state (OAuth tokens, caches, configs) can n
 First nix-native skill: `google-calendar` (gcalcli) with `stateDir = "gcalcli"` for OAuth token persistence. Lives in `nix/skills/` (not upstream), referenced directly via `mkSkill` in the catalog. The catalog now accepts `mkSkill` alongside `fromBundled` for skills with custom SKILL.md files.
 
 Consumer usage: `skills = [ inputs.nix-moltbot.skills.${system}.google-calendar ];` — gcalcli lands on PATH and the writable state dir is created automatically.
+
+**Bugs found during testing:**
+
+- **HM test was grepping unit file, not wrapper script.** `systemctl --user cat` shows the unit file, but jq/env vars are in the wrapper script. Fixed to extract wrapper path from ExecStart and grep that instead.
+- **systemd-tmpfiles unsafe path transition.** The `.skill-state` parent dir was implicitly created as `root:root` inside an `openclaw:openclaw`-owned workspace. tmpfiles refused to create child dirs due to the ownership transition. Fixed by adding an explicit `d` rule for `.skill-state` with correct ownership before per-skill subdirectory rules.

@@ -156,7 +156,10 @@ EOF
         tools = toolsWithReport;
       }) instanceConfigs;
 
-  # Generate tmpfiles rules for skills and documents
+  # Skills that declare a stateDir need a writable directory under workspace
+  skillsWithState = lib.filter (s: (s.stateDir or null) != null) drvSkills;
+
+  # Generate tmpfiles rules for skills, state dirs, and documents
   tmpfilesRules =
     let
       rulesForInstance = instName: instCfg:
@@ -165,6 +168,9 @@ EOF
           skillRules = map (entry:
             "L+ ${workspaceDir}/${entry.path} - ${cfg.user} ${cfg.group} - ${entry.drv}"
           ) (skillDerivations.${instName} or []);
+          stateDirRules = map (s:
+            "d ${workspaceDir}/.skill-state/${s.stateDir} 0750 ${cfg.user} ${cfg.group} -"
+          ) skillsWithState;
           docRules = if documentsDerivations.${instName} == null then [] else
             let docs = documentsDerivations.${instName}; in [
               "C ${workspaceDir}/AGENTS.md 0640 ${cfg.user} ${cfg.group} - ${docs.agents}"
@@ -172,7 +178,7 @@ EOF
               "C ${workspaceDir}/TOOLS.md 0640 ${cfg.user} ${cfg.group} - ${docs.tools}"
             ];
         in
-          skillRules ++ docRules;
+          skillRules ++ stateDirRules ++ docRules;
     in
       lib.flatten (lib.mapAttrsToList rulesForInstance instanceConfigs);
 

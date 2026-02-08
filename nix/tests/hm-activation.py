@@ -14,6 +14,9 @@ with subtest("Skill library: inline skill installed"):
     machine.succeed("test -f /home/alice/.openclaw/workspace/skills/inline-test/SKILL.md")
     machine.succeed("grep -q 'Inline Test' /home/alice/.openclaw/workspace/skills/inline-test/SKILL.md")
 
+with subtest("Skill library: state dir created"):
+    machine.succeed("test -d /home/alice/.openclaw/workspace/.skill-state/hm-test-state")
+
 uid = machine.succeed("id -u alice").strip()
 machine.succeed("loginctl enable-linger alice")
 machine.succeed(f"systemctl start user@{uid}.service")

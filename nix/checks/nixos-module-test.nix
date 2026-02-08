@@ -19,6 +19,7 @@ let
     name = "nixos-test-skill";
     tools = [ pkgs.jq ];
     env = { NIXOS_TEST_VAR = "works"; };
+    stateDir = "test-state";
   };
 in
 
@@ -100,6 +101,9 @@ pkgs.testers.nixosTest {
 
     with subtest("Skill library: inline skill installed"):
         server.succeed("test -d /var/lib/openclaw/workspace/skills/inline-nixos-test")
+
+    with subtest("Skill library: state dir created"):
+        server.succeed("test -d /var/lib/openclaw/workspace/.skill-state/test-state")
 
     with subtest("Skill library: gateway wrapper has jq on PATH"):
         # Extract wrapper path from ExecStart and verify it contains jq in PATH

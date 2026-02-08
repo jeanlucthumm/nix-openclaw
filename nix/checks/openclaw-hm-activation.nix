@@ -12,6 +12,7 @@ let
     name = "hm-test-skill";
     tools = [ pkgs.jq ];
     env = { TEST_SKILL_VAR = "hello"; };
+    stateDir = "hm-test-state";
   };
 
 in

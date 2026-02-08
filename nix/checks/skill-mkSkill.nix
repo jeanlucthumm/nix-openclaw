@@ -33,6 +33,13 @@ let
     name = "custom-name";
   };
 
+  # Test 4: Skill with stateDir
+  stateful = mkSkill {
+    src = testSrc;
+    name = "stateful-skill";
+    stateDir = "test-state";
+  };
+
 in
 pkgs.runCommand "check-skill-mkSkill" {} ''
   set -euo pipefail
@@ -54,6 +61,10 @@ pkgs.runCommand "check-skill-mkSkill" {} ''
   # (checked at eval time below)
   echo "PASS: name resolution works"
 
+  echo "=== Test 5: stateDir passthru ==="
+  # (checked at eval time below)
+  echo "PASS: stateDir passthru works"
+
   echo "All mkSkill checks passed."
   mkdir -p "$out"
   touch "$out/passed"
@@ -69,5 +80,7 @@ pkgs.runCommand "check-skill-mkSkill" {} ''
     basicSecrets = assert basic.secrets.SECRET_KEY == "/run/agenix/secret"; true;
     patchedName = assert patched.skillName == "test-skill"; true;
     namedName = assert named.skillName == "custom-name"; true;
+    statefulStateDir = assert stateful.stateDir == "test-state"; true;
+    basicStateDir = assert basic.stateDir == null; true;
   };
 }

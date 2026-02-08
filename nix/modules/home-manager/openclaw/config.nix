@@ -198,6 +198,12 @@ let
   instanceConfigs = lib.mapAttrsToList mkInstanceConfig enabledInstances;
   appInstalls = lib.filter (item: item != null) (map (item: item.appInstall) instanceConfigs);
 
+  # Skill state dirs: workspace/.skill-state/<stateDir> for each instance × skill
+  skillsWithState = lib.filter (s: (s.stateDir or null) != null) files.drvSkills;
+  skillStateDirs = lib.concatMap (inst:
+    map (s: "${openclawLib.resolvePath inst.workspaceDir}/.skill-state/${s.stateDir}") skillsWithState
+  ) (lib.attrValues enabledInstances);
+
   appDefaults = lib.foldl' (acc: item: lib.recursiveUpdate acc item.appDefaults) {} instanceConfigs;
   appDefaultsEnabled = lib.filterAttrs (_: inst: inst.appDefaults.enable) enabledInstances;
 
@@ -247,6 +253,7 @@ in {
     home.activation.openclawDirs = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
       run --quiet ${lib.getExe' pkgs.coreutils "mkdir"} -p ${lib.concatStringsSep " " (lib.concatMap (item: item.dirs) instanceConfigs)}
       ${lib.optionalString (plugins.pluginStateDirsAll != []) "run --quiet ${lib.getExe' pkgs.coreutils "mkdir"} -p ${lib.concatStringsSep " " plugins.pluginStateDirsAll}"}
+      ${lib.optionalString (skillStateDirs != []) "run --quiet ${lib.getExe' pkgs.coreutils "mkdir"} -p ${lib.concatStringsSep " " skillStateDirs}"}
     '';
 
     home.activation.openclawConfigFiles = lib.hm.dag.entryAfter [ "openclawDirs" ] ''

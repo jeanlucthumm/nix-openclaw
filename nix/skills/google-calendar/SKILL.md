@@ -5,29 +5,21 @@ description: Google Calendar via gcalcli — view, create, edit, and delete even
 
 # google-calendar
 
-Use `gcalcli` for Google Calendar operations. Requires one-time OAuth setup.
+Use `gcalcli` for Google Calendar operations. Always pass `--config-folder workspace/.skill-state/gcalcli/` so tokens persist in the writable state directory.
 
-**Important:** Always pass `--config-folder workspace/.skill-state/gcalcli/` so tokens persist in the writable state directory.
+## Authentication
 
-## Setup (once)
+If any gcalcli command fails with an authentication or credentials error, tell the user they need to run the one-time OAuth setup on the server:
 
-Walk the user through initial OAuth authentication:
-
-```bash
-gcalcli --config-folder workspace/.skill-state/gcalcli/ init
+```
+sudo -u openclaw gcalcli --config-folder /var/lib/openclaw/workspace/.skill-state/gcalcli/ init
 ```
 
-This opens a browser URL for the OAuth consent flow. The user pastes the URL, authorizes, and gcalcli stores the refresh token in the state directory.
+This prints an OAuth URL to open in a browser. After authorizing, gcalcli stores the refresh token in the state directory and all subsequent commands will work.
 
-If a custom OAuth client ID is needed:
-
-```bash
-gcalcli --config-folder workspace/.skill-state/gcalcli/ --client-id=<CLIENT_ID> init
-```
+Do not attempt to run `gcalcli init` yourself — it requires interactive browser-based authorization.
 
 ## Common commands
-
-Always include `--config-folder workspace/.skill-state/gcalcli/` in every command.
 
 ### View events
 
@@ -59,13 +51,13 @@ Always include `--config-folder workspace/.skill-state/gcalcli/` in every comman
 
 ### Output formats
 
-- JSON output for scripting: append `--tsv` for tab-separated values
 - Detailed event info: `gcalcli --config-folder workspace/.skill-state/gcalcli/ agenda --details all`
 - Filter by calendar: `gcalcli --config-folder workspace/.skill-state/gcalcli/ agenda --calendar "Work"`
+- Tab-separated output: append `--tsv`
 
 ## Notes
 
 - Confirm before creating, editing, or deleting events.
-- The `--config-folder` path is relative to the workspace root. The agent knows the workspace root.
+- The `--config-folder` path is relative to the workspace root.
 - gcalcli self-manages OAuth tokens in the state directory — no manual secret management needed after initial setup.
 - Use `quick` for fast event creation with natural language; use `add` when you need precise control over fields.

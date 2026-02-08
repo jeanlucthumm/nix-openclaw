@@ -168,9 +168,12 @@ EOF
           skillRules = map (entry:
             "L+ ${workspaceDir}/${entry.path} - ${cfg.user} ${cfg.group} - ${entry.drv}"
           ) (skillDerivations.${instName} or []);
-          stateDirRules = map (s:
-            "d ${workspaceDir}/.skill-state/${s.stateDir} 0750 ${cfg.user} ${cfg.group} -"
-          ) skillsWithState;
+          stateDirRules =
+            (lib.optional (skillsWithState != [])
+              "d ${workspaceDir}/.skill-state 0750 ${cfg.user} ${cfg.group} -")
+            ++ map (s:
+              "d ${workspaceDir}/.skill-state/${s.stateDir} 0750 ${cfg.user} ${cfg.group} -"
+            ) skillsWithState;
           docRules = if documentsDerivations.${instName} == null then [] else
             let docs = documentsDerivations.${instName}; in [
               "C ${workspaceDir}/AGENTS.md 0640 ${cfg.user} ${cfg.group} - ${docs.agents}"

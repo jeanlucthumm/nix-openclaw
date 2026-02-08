@@ -29,11 +29,18 @@ machine.succeed("chmod 1777 /tmp/openclaw")
 
 user_env = "XDG_RUNTIME_DIR=/run/user/1000 DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus"
 machine.succeed(f"su - alice -c '{user_env} systemctl --user daemon-reload'")
+
+# Extract the wrapper script path from ExecStart and verify its contents
+wrapper_path = machine.succeed(
+    f"su - alice -c '{user_env} systemctl --user show openclaw-gateway.service -p ExecStart'"
+    " | sed 's/.*path=//;s/ ;.*//'"
+).strip()
+
 with subtest("Skill library: gateway wrapper has jq on PATH"):
-    machine.succeed(f"su - alice -c '{user_env} systemctl --user cat openclaw-gateway.service' | grep -q jq")
+    machine.succeed(f"grep -q jq {wrapper_path}")
 
 with subtest("Skill library: gateway wrapper exports skill env"):
-    machine.succeed(f"su - alice -c '{user_env} systemctl --user cat openclaw-gateway.service' | grep -q TEST_SKILL_VAR")
+    machine.succeed(f"grep -q TEST_SKILL_VAR {wrapper_path}")
 
 machine.succeed(f"su - alice -c '{user_env} systemctl --user start openclaw-gateway.service'")
 machine.wait_for_unit("openclaw-gateway.service", user="alice")

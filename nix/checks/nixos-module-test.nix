@@ -103,6 +103,9 @@ pkgs.testers.nixosTest {
         server.succeed("test -d /var/lib/openclaw/workspace/skills/inline-nixos-test")
 
     with subtest("Skill library: state dir created"):
+        server.log(server.succeed("grep -r skill-state /etc/tmpfiles.d/ || echo 'no skill-state in tmpfiles'"))
+        server.log(server.succeed("ls -la /var/lib/openclaw/workspace/ || echo 'cannot list workspace'"))
+        server.log(server.succeed("ls -la /var/lib/openclaw/workspace/.skill-state/ || echo 'no .skill-state dir'"))
         server.succeed("test -d /var/lib/openclaw/workspace/.skill-state/test-state")
 
     with subtest("Skill library: gateway wrapper has jq on PATH"):

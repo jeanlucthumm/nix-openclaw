@@ -14,10 +14,11 @@
     , tools ? []
     , env ? {}
     , secrets ? {}
+    , stateDir ? null
     , overrides ? {}
     }:
     mkSkill {
-      inherit name tools env secrets overrides;
+      inherit name tools env secrets stateDir overrides;
       src = "${openclawSrc}/skills/${name}";
     };
 
@@ -31,6 +32,7 @@
     , tools ? []
     , env ? {}
     , secrets ? {}
+    , stateDir ? null
     , overrides ? {}
     , name ? null
     }:
@@ -41,7 +43,7 @@
       src = if skillPath == "" then fullSrc else "${fullSrc}/${skillPath}";
     in
     mkSkill {
-      inherit src tools env secrets overrides;
+      inherit src tools env secrets stateDir overrides;
       name = if name != null then name
         else if skillPath != "" then builtins.baseNameOf skillPath
         else repo;

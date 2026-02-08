@@ -9,7 +9,7 @@ let
   mkSkill = import ./mkSkill.nix { inherit lib pkgs; };
   fetchers = import ./fetchers.nix { inherit lib pkgs mkSkill openclawSrc; };
   catalog = import ./skill-catalog.nix {
-    inherit lib pkgs;
+    inherit lib pkgs mkSkill;
     inherit (fetchers) fromBundled;
   };
 in {

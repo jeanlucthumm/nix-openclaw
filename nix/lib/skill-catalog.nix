@@ -1,11 +1,14 @@
-# Pre-packaged skill catalog — curated fromBundled calls with verified tool mappings
+# Pre-packaged skill catalog — curated skill builds with verified tool mappings
 #
 # Each entry explicitly declares which nixpkgs packages the skill needs.
 # Only skills with tools available in nixpkgs are included here.
 # Skills needing steipete-tools or custom packages should use the plugin system
 # or mkSkill directly.
+#
+# Most skills use fromBundled (upstream openclaw repo). Skills with custom
+# SKILL.md files live in nix/skills/ and use mkSkill directly.
 
-{ lib, pkgs, fromBundled }:
+{ lib, pkgs, mkSkill, fromBundled }:
 
 {
   github = fromBundled {
@@ -41,6 +44,15 @@
   _1password = fromBundled {
     name = "1password";
     tools = [ pkgs._1password-cli ];
+  };
+
+  # Nix-native skills (SKILL.md lives in nix/skills/, not upstream)
+
+  google-calendar = mkSkill {
+    src = ../skills/google-calendar;
+    name = "google-calendar";
+    tools = [ pkgs.gcalcli ];
+    stateDir = "gcalcli";
   };
 
   # Skills with no tool dependencies (teaching-only / API-key-only)

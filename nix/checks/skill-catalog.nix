@@ -9,7 +9,7 @@ let
   # Pick entries that exercise different patterns:
   # tools, no tools, multiple tools
   testEntries = {
-    inherit (catalog) github tmux weather session-logs canvas;
+    inherit (catalog) github tmux weather session-logs canvas google-calendar;
   };
 
   checks = lib.mapAttrsToList (name: skill: ''
@@ -37,5 +37,8 @@ pkgs.runCommand "check-skill-catalog" {} ''
     githubTools = assert builtins.length catalog.github.tools == 1; true;
     canvasNoTools = assert catalog.canvas.tools == []; true;
     sessionLogsTwoTools = assert builtins.length catalog.session-logs.tools == 2; true;
+    gcalName = assert catalog.google-calendar.skillName == "google-calendar"; true;
+    gcalStateDir = assert catalog.google-calendar.stateDir == "gcalcli"; true;
+    gcalTools = assert builtins.length catalog.google-calendar.tools == 1; true;
   };
 }

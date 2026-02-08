@@ -60,3 +60,13 @@ Same pattern: type union in options, partition in documents-skills, tool/env/sec
 **Files:** `nix/checks/openclaw-hm-activation.nix`, `nix/checks/nixos-module-test.nix`, `nix/tests/hm-activation.py`
 
 Both HM and NixOS VM tests now include a mkSkill derivation + inline skill. Verifies: skill dirs in workspace, gateway wrapper has tools on PATH, env vars exported.
+
+### Chunk 8: `stateDir` for mkSkill + Google Calendar skill
+
+**Files:** `nix/lib/mkSkill.nix`, `nix/lib/fetchers.nix`, `nix/lib/skill-catalog.nix`, `nix/lib/default.nix`, `nix/modules/nixos/documents-skills.nix`, `nix/modules/home-manager/openclaw/config.nix`, `nix/skills/google-calendar/SKILL.md`, `nix/checks/skill-mkSkill.nix`, `nix/checks/nixos-module-test.nix`, `nix/checks/openclaw-hm-activation.nix`, `nix/tests/hm-activation.py`, `nix/checks/skill-catalog.nix`
+
+Skills that need persistent writable state (OAuth tokens, caches, configs) can now declare `stateDir = "name"`. The NixOS module creates the directory via systemd-tmpfiles at `workspace/.skill-state/<name>/`; the HM module does the same via activation script. Both `fromBundled` and `fromGitHub` fetchers now pass `stateDir` through to `mkSkill`.
+
+First nix-native skill: `google-calendar` (gcalcli) with `stateDir = "gcalcli"` for OAuth token persistence. Lives in `nix/skills/` (not upstream), referenced directly via `mkSkill` in the catalog. The catalog now accepts `mkSkill` alongside `fromBundled` for skills with custom SKILL.md files.
+
+Consumer usage: `skills = [ inputs.nix-moltbot.skills.${system}.google-calendar ];` — gcalcli lands on PATH and the writable state dir is created automatically.

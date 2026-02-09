@@ -16,6 +16,17 @@ This fork builds on top of the base nix-openclaw package. Here's what's differen
 
 Full Linux support including `aarch64-linux` and working systemd user services out of the box.
 
+### NixOS Module
+
+Run Openclaw as an isolated system user with systemd hardening. Contains the blast radius if the LLM is compromised — `ProtectHome`, `PrivateTmp`, `NoNewPrivileges`, syscall filtering, and more.
+
+```nix
+services.openclaw = {
+  enable = true;
+  providers.anthropic.oauthTokenFile = config.age.secrets.openclaw-token.path;
+};
+```
+
 ---
 
 ## Contributions (read this first)

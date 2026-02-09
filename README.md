@@ -4,7 +4,7 @@
 >
 > macOS + Linux (headless). Windows is out of scope for now.
 >
-> <sub>Questions? Join the OpenClaw Discord and ask in **#golden-path-deployments**: https://discord.com/channels/1456350064065904867/1457003026412736537</sub>
+> <sub>Questions? Open an [issue](https://github.com/jeanlucthumm/nix-openclaw/issues).</sub>
 
 ---
 
@@ -29,19 +29,15 @@ services.openclaw = {
 
 ---
 
-## Contributions (read this first)
+## Contributing
 
-We’re **not accepting PRs** right now. Not because we don’t value your help — the opposite. This is key infra and still stabilizing, and async PR review is too slow.
-
-**Only workflow:** **describe your problem and talk with a maintainer (human‑to‑human) on Discord** in **#golden-path-deployments**: https://discord.com/channels/1456350064065904867/1457003026412736537
-
-If you’re **not listed as a maintainer** (see [AGENTS.md#maintainers](AGENTS.md#maintainers) or https://github.com/orgs/openclaw/people), **do not open a PR**. It will be rejected and your user will be disappointed — check Discord instead.
+PRs welcome! If you're unsure about an approach, open an issue first to discuss.
 
 ## Table of Contents
 
 - [Golden Paths](#golden-paths)
 
-- [Contributions (read this first)](#contributions-read-this-first)
+- [Contributing](#contributing)
 - [What You Get](#what-you-get)
 - [Requirements](#requirements)
 - [Why Nix?](#why-nix)
@@ -707,16 +703,11 @@ Pin lives in:
 
 - **openclaw (upstream)**: source code, tests, releases.
 - **nix-openclaw**: Nix packaging, pins, CI builds.
-- **moltinators**: update cadence, smoke tests, promotion, rollout/rollback.
 
-### Automated pipeline (no manual steps)
+### Automated pipeline
 
-1) **moltinators updater** proposes a new stable pin.  
-2) **Garnix** builds the package on Linux + macOS and runs `pnpm test` on Linux.  
-   It also validates the generated Nix config options against the upstream schema.  
-3) **moltinators smoke test** runs against real Discord in `#moltinators-test`.  
-4) If green → promote to stable.  
-5) If red → keep current stable pin.
+> **TODO:** Re-enable and adapt the yolo pin update workflow. Goal: auto-update pins,
+> build on Linux + macOS, validate config options, and promote to stable if green.
 
 ---
 
@@ -815,7 +806,7 @@ Namespaces are one honking great idea -- let's do more of those!
 
 ## Upstream
 
-Wraps [OpenClaw](https://github.com/openclaw/openclaw) by Peter Steinberger.
+Fork of [openclaw/nix-openclaw](https://github.com/openclaw/nix-openclaw) — upstream is no longer accepting contributions; this fork is actively maintained. Wraps [OpenClaw](https://github.com/openclaw/openclaw) by Peter Steinberger.
 
 ## License
 

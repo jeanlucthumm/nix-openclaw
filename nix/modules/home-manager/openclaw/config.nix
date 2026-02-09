@@ -173,17 +173,17 @@ let
         };
         Service = {
           ExecStart = "${gatewayWrapper}/bin/openclaw-gateway-${name} gateway --port ${toString inst.gatewayPort}";
-          WorkingDirectory = inst.stateDir;
+          WorkingDirectory = openclawLib.resolvePath inst.stateDir;
           Restart = "always";
           RestartSec = "1s";
           Environment = [
             "HOME=${homeDir}"
-            "OPENCLAW_CONFIG_PATH=${inst.configPath}"
-            "OPENCLAW_STATE_DIR=${inst.stateDir}"
+            "OPENCLAW_CONFIG_PATH=${openclawLib.resolvePath inst.configPath}"
+            "OPENCLAW_STATE_DIR=${openclawLib.resolvePath inst.stateDir}"
             "OPENCLAW_NIX_MODE=1"
           ];
-          StandardOutput = "append:${inst.logPath}";
-          StandardError = "append:${inst.logPath}";
+          StandardOutput = "append:${openclawLib.resolvePath inst.logPath}";
+          StandardError = "append:${openclawLib.resolvePath inst.logPath}";
         };
       };
     };

@@ -65,6 +65,10 @@
           hm-activation = import ./nix/checks/openclaw-hm-activation.nix {
             inherit pkgs home-manager;
           };
+          nixos-module = import ./nix/checks/nixos-module-test.nix {
+            inherit pkgs;
+            openclawModule = self.nixosModules.openclaw;
+          };
         } else {});
 
         devShells.default = pkgs.mkShell {
@@ -79,5 +83,6 @@
       overlays.default = overlay;
       homeManagerModules.openclaw = import ./nix/modules/home-manager/openclaw.nix;
       darwinModules.openclaw = import ./nix/modules/darwin/openclaw.nix;
+      nixosModules.openclaw = import ./nix/modules/nixos/openclaw.nix;
     };
 }

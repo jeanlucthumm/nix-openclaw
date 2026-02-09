@@ -6,6 +6,18 @@
 >
 > <sub>Questions? Join the OpenClaw Discord and ask in **#golden-path-deployments**: https://discord.com/channels/1456350064065904867/1457003026412736537</sub>
 
+---
+
+## What This Fork Adds
+
+This fork builds on top of the base nix-openclaw package. Here's what's different:
+
+### Linux Support
+
+Full Linux support including `aarch64-linux` and working systemd user services out of the box.
+
+---
+
 ## Contributions (read this first)
 
 We’re **not accepting PRs** right now. Not because we don’t value your help — the opposite. This is key infra and still stabilizing, and async PR review is too slow.

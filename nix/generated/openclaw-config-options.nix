@@ -2016,6 +2016,10 @@ in
         }; });
           default = null;
         };
+        mediaLocalRoots = lib.mkOption {
+          type = t.nullOr (t.listOf (t.str));
+          default = null;
+        };
         mediaMaxMb = lib.mkOption {
           type = t.nullOr (t.int);
           default = null;
@@ -2237,6 +2241,10 @@ in
           default = null;
         };
       }; });
+        default = null;
+      };
+      mediaLocalRoots = lib.mkOption {
+        type = t.nullOr (t.listOf (t.str));
         default = null;
       };
       mediaMaxMb = lib.mkOption {
@@ -2509,6 +2517,10 @@ in
           };
           sessionFilter = lib.mkOption {
             type = t.nullOr (t.listOf (t.str));
+            default = null;
+          };
+          target = lib.mkOption {
+            type = t.nullOr (t.enum [ "dm" "channel" "both" ]);
             default = null;
           };
         }; });
@@ -2973,6 +2985,10 @@ in
         };
         sessionFilter = lib.mkOption {
           type = t.nullOr (t.listOf (t.str));
+          default = null;
+        };
+        target = lib.mkOption {
+          type = t.nullOr (t.enum [ "dm" "channel" "both" ]);
           default = null;
         };
       }; });

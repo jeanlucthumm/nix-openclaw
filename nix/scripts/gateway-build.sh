@@ -72,8 +72,17 @@ fi
 
 log_step "patchShebangs node_modules/.bin" bash -e -c ". \"$STDENV_SETUP\"; patchShebangs node_modules/.bin"
 
-log_step "pnpm build" pnpm build
-log_step "pnpm ui:build" pnpm ui:build
+# Break down `pnpm build` (upstream package.json) so we can profile it.
+log_step "build: canvas:a2ui:bundle" pnpm canvas:a2ui:bundle
+log_step "build: tsdown" pnpm exec tsdown
+log_step "build: plugin-sdk dts" pnpm build:plugin-sdk:dts
+log_step "build: write-plugin-sdk-entry-dts" node --import tsx scripts/write-plugin-sdk-entry-dts.ts
+log_step "build: canvas-a2ui-copy" node --import tsx scripts/canvas-a2ui-copy.ts
+log_step "build: copy-hook-metadata" node --import tsx scripts/copy-hook-metadata.ts
+log_step "build: write-build-info" node --import tsx scripts/write-build-info.ts
+log_step "build: write-cli-compat" node --import tsx scripts/write-cli-compat.ts
+
+log_step "ui:build" pnpm ui:build
 
 log_step "pnpm prune --prod" env CI=true pnpm prune --prod
 

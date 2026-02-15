@@ -232,7 +232,7 @@ if (
     bash -c "cd '$tmp_src/src' && pnpm install --frozen-lockfile --ignore-scripts"
 
   nix shell --extra-experimental-features "nix-command flakes" nixpkgs#nodejs_22 nixpkgs#pnpm_10 -c \
-    bash -c "cd '$tmp_src/src' && pnpm exec tsx '$repo_root/nix/scripts/generate-config-options.ts' --repo . --out '$config_options_file'"
+    bash -c "cd '$tmp_src/src' && OPENCLAW_SCHEMA_REV='${selected_sha}' pnpm exec tsx '$repo_root/nix/scripts/generate-config-options.ts' --repo . --out '$config_options_file'"
 
   cleanup_tmp
   trap - EXIT

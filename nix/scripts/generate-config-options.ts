@@ -11,6 +11,7 @@ const argValue = (flag: string): string | null => {
 
 const repo = argValue("--repo") ?? process.cwd();
 const outPath = argValue("--out") ?? path.join(process.cwd(), "nix/generated/openclaw-config-options.nix");
+const schemaRev = argValue("--rev") ?? process.env.OPENCLAW_SCHEMA_REV ?? null;
 
 const schemaPath = path.join(repo, "src/config/zod-schema.ts");
 const schemaUrl = pathToFileURL(schemaPath).href;
@@ -255,7 +256,11 @@ const renderOption = (key: string, schemaObj: JsonSchema, required: boolean, ind
     .map((key) => renderOption(key, rootProps[key], requiredRoot.has(key), "  "))
     .join("\n\n");
 
-  const output = `# Generated from upstream OpenClaw schema. DO NOT EDIT.\n{ lib }:\nlet\n  t = lib.types;\nin\n{\n${body}\n}\n`;
+  const header = schemaRev
+    ? `# Generated from upstream OpenClaw schema at rev ${schemaRev}. DO NOT EDIT.`
+    : "# Generated from upstream OpenClaw schema. DO NOT EDIT.";
+
+  const output = `${header}\n# Generator: nix/scripts/generate-config-options.ts\n{ lib }:\nlet\n  t = lib.types;\nin\n{\n${body}\n}\n`;
 
   fs.mkdirSync(path.dirname(outPath), { recursive: true });
   fs.writeFileSync(outPath, output, "utf8");

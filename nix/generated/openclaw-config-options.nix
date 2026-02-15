@@ -2343,6 +2343,10 @@ in
       type = t.nullOr (t.submodule { options = {
       accounts = lib.mkOption {
         type = t.nullOr (t.attrsOf (t.submodule { options = {
+        ackReaction = lib.mkOption {
+          type = t.nullOr (t.str);
+          default = null;
+        };
         actions = lib.mkOption {
           type = t.nullOr (t.submodule { options = {
           channelInfo = lib.mkOption {
@@ -2816,7 +2820,25 @@ in
           type = t.nullOr (t.str);
           default = null;
         };
+        ui = lib.mkOption {
+          type = t.nullOr (t.submodule { options = {
+          components = lib.mkOption {
+            type = t.nullOr (t.submodule { options = {
+            accentColor = lib.mkOption {
+              type = t.nullOr (t.str);
+              default = null;
+            };
+          }; });
+            default = null;
+          };
+        }; });
+          default = null;
+        };
       }; }));
+        default = null;
+      };
+      ackReaction = lib.mkOption {
+        type = t.nullOr (t.str);
         default = null;
       };
       actions = lib.mkOption {
@@ -3290,6 +3312,20 @@ in
       };
       token = lib.mkOption {
         type = t.nullOr (t.str);
+        default = null;
+      };
+      ui = lib.mkOption {
+        type = t.nullOr (t.submodule { options = {
+        components = lib.mkOption {
+          type = t.nullOr (t.submodule { options = {
+          accentColor = lib.mkOption {
+            type = t.nullOr (t.str);
+            default = null;
+          };
+        }; });
+          default = null;
+        };
+      }; });
         default = null;
       };
     }; });
@@ -5129,6 +5165,10 @@ in
       type = t.nullOr (t.submodule { options = {
       accounts = lib.mkOption {
         type = t.nullOr (t.attrsOf (t.submodule { options = {
+        ackReaction = lib.mkOption {
+          type = t.nullOr (t.str);
+          default = null;
+        };
         actions = lib.mkOption {
           type = t.nullOr (t.submodule { options = {
           channelInfo = lib.mkOption {
@@ -5487,6 +5527,10 @@ in
           default = null;
         };
       }; }));
+        default = null;
+      };
+      ackReaction = lib.mkOption {
+        type = t.nullOr (t.str);
         default = null;
       };
       actions = lib.mkOption {
@@ -5853,6 +5897,10 @@ in
       type = t.nullOr (t.submodule { options = {
       accounts = lib.mkOption {
         type = t.nullOr (t.attrsOf (t.submodule { options = {
+        ackReaction = lib.mkOption {
+          type = t.nullOr (t.str);
+          default = null;
+        };
         actions = lib.mkOption {
           type = t.nullOr (t.submodule { options = {
           deleteMessage = lib.mkOption {
@@ -6207,6 +6255,10 @@ in
           default = null;
         };
       }; }));
+        default = null;
+      };
+      ackReaction = lib.mkOption {
+        type = t.nullOr (t.str);
         default = null;
       };
       actions = lib.mkOption {

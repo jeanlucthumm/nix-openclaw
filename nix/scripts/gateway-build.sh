@@ -72,6 +72,11 @@ fi
 
 log_step "patchShebangs node_modules/.bin" bash -e -c ". \"$STDENV_SETUP\"; patchShebangs node_modules/.bin"
 
+# Ensure rolldown is found from workspace bins in offline/sandbox builds.
+if [ -d "node_modules/.pnpm/node_modules/.bin" ]; then
+  export PATH="$PWD/node_modules/.pnpm/node_modules/.bin:$PATH"
+fi
+
 # Break down `pnpm build` (upstream package.json) so we can profile it.
 log_step "build: canvas:a2ui:bundle" pnpm canvas:a2ui:bundle
 log_step "build: tsdown" pnpm exec tsdown

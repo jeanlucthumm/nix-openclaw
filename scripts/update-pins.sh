@@ -12,6 +12,8 @@ app_file="$repo_root/nix/packages/openclaw-app.nix"
 config_options_file="$repo_root/nix/generated/openclaw-config-options.nix"
 flake_lock_file="$repo_root/flake.lock"
 
+upstream_main_sha=$(git ls-remote https://github.com/openclaw/openclaw.git refs/heads/main | awk '{print $1}' || true)
+
 log() {
   printf '>> %s\n' "$*"
 }
@@ -67,6 +69,8 @@ cp "$app_file" "$openclaw_backup_dir/$(basename "$app_file")"
 if [[ -f "$config_options_file" ]]; then
   cp "$config_options_file" "$openclaw_backup_dir/$(basename "$config_options_file")"
 fi
+
+openclaw_bump_failed=0
 
 if (
   set -euo pipefail
@@ -266,6 +270,7 @@ if (
 ); then
   log "Openclaw bump succeeded"
 else
+  openclaw_bump_failed=1
   log "Openclaw bump skipped/failed; restoring openclaw pin files"
   cp "$openclaw_backup_dir/$(basename "$source_file")" "$source_file"
   cp "$openclaw_backup_dir/$(basename "$app_file")" "$app_file"
@@ -276,6 +281,14 @@ fi
 
 # NOTE: /tmp is ephemeral in GitHub Actions; keep cleanup best-effort.
 rm -rf "$openclaw_backup_dir" 2>/dev/null || true
+
+if [[ "$openclaw_bump_failed" -eq 1 ]]; then
+  current_rev=$(awk -F'"' '/rev =/{print $2}' "$source_file" | head -n 1)
+  if [[ -n "$upstream_main_sha" && -n "$current_rev" && "$current_rev" != "$upstream_main_sha" ]]; then
+    echo "Openclaw bump failed while upstream advanced (${current_rev} -> ${upstream_main_sha}); failing run." >&2
+    exit 1
+  fi
+fi
 
 if git diff --quiet; then
   echo "No pin changes detected."

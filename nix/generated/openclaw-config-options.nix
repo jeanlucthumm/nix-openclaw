@@ -1,4 +1,4 @@
-# Generated from upstream OpenClaw schema at rev 84a88b2ace8ef4450f7052660c973ac964ee8201. DO NOT EDIT.
+# Generated from upstream OpenClaw schema at rev fe807e4bedf62d300dcd0334e279f9774d5121c2. DO NOT EDIT.
 # Generator: nix/scripts/generate-config-options.ts
 { lib }:
 let
@@ -267,6 +267,14 @@ in
       };
       compaction = lib.mkOption {
         type = t.nullOr (t.submodule { options = {
+        identifierInstructions = lib.mkOption {
+          type = t.nullOr (t.str);
+          default = null;
+        };
+        identifierPolicy = lib.mkOption {
+          type = t.nullOr (t.oneOf [ (t.enum [ "strict" ]) (t.enum [ "off" ]) (t.enum [ "custom" ]) ]);
+          default = null;
+        };
         keepRecentTokens = lib.mkOption {
           type = t.nullOr (t.int);
           default = null;

@@ -1,4 +1,4 @@
-# Generated from upstream OpenClaw schema at rev 0fb7add7d6c5f0bc93ff8811d3f37f2e3d18b132. DO NOT EDIT.
+# Generated from upstream OpenClaw schema at rev aae90cb0364e04d3620f64e91877012d4f29f23d. DO NOT EDIT.
 # Generator: nix/scripts/generate-config-options.ts
 { lib }:
 let
@@ -3207,16 +3207,20 @@ in
             type = t.nullOr (t.bool);
             default = null;
           };
+          idleHours = lib.mkOption {
+            type = t.nullOr (t.number);
+            default = null;
+          };
+          maxAgeHours = lib.mkOption {
+            type = t.nullOr (t.number);
+            default = null;
+          };
           spawnAcpSessions = lib.mkOption {
             type = t.nullOr (t.bool);
             default = null;
           };
           spawnSubagentSessions = lib.mkOption {
             type = t.nullOr (t.bool);
-            default = null;
-          };
-          ttlHours = lib.mkOption {
-            type = t.nullOr (t.number);
             default = null;
           };
         }; });
@@ -3986,16 +3990,20 @@ in
           type = t.nullOr (t.bool);
           default = null;
         };
+        idleHours = lib.mkOption {
+          type = t.nullOr (t.number);
+          default = null;
+        };
+        maxAgeHours = lib.mkOption {
+          type = t.nullOr (t.number);
+          default = null;
+        };
         spawnAcpSessions = lib.mkOption {
           type = t.nullOr (t.bool);
           default = null;
         };
         spawnSubagentSessions = lib.mkOption {
           type = t.nullOr (t.bool);
-          default = null;
-        };
-        ttlHours = lib.mkOption {
-          type = t.nullOr (t.number);
           default = null;
         };
       }; });
@@ -10456,7 +10464,11 @@ in
         type = t.nullOr (t.bool);
         default = null;
       };
-      ttlHours = lib.mkOption {
+      idleHours = lib.mkOption {
+        type = t.nullOr (t.number);
+        default = null;
+      };
+      maxAgeHours = lib.mkOption {
         type = t.nullOr (t.number);
         default = null;
       };

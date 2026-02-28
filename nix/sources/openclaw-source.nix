@@ -1,8 +1,9 @@
-# Pinned OpenClaw source for nix-openclaw
+# Pinned Openclaw source for nix-openclaw
+# This branch points to jeanlucthumm's fork with custom fixes
 {
-  owner = "openclaw";
+  owner = "jeanlucthumm";
   repo = "openclaw";
-  rev = "0566845b7133515bfc50ae0e770c8c55d5198cd4";
-  hash = "sha256-CIIgu5O2/z//4gSUry/NhiURvneA1bxlbih+BZtBHmc=";
-  pnpmDepsHash = "sha256-QnKPVUPgy3znCQRmfqiIPtRLgZ0SPwWqUsJ4USF2LJE=";
+  rev = "7d6b5a21417914b7a53994df034a8186c13edcd5";
+  hash = "sha256-x9enEocNPyrzfmUA/9dhDYNfzOokixuM2t5BIudpLec=";
+  pnpmDepsHash = "sha256-WdR5ju4JPcnPN43wUXbj2cY7zqWDT6XlwhgUJcG6eMk=";
 }

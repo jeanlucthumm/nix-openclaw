@@ -194,6 +194,9 @@ let
       workspaceDir = inst.workspaceDir;
       gatewayPort = inst.gatewayPort;
       package = gatewayPackage;
+      environment = inst.environment;
+      environmentFiles = inst.environmentFiles;
+      servicePath = inst.servicePath;
     };
 
   instanceConfigs = lib.mapAttrs mkInstanceConfig enabledInstances;
@@ -275,6 +278,11 @@ in {
       after = [ "network-online.target" ];
       wants = [ "network-online.target" ];
 
+      path = [
+        pkgs.bash
+        pkgs.coreutils
+      ] ++ instCfg.servicePath;
+
       serviceConfig = {
         Type = "simple";
         User = cfg.user;
@@ -293,7 +301,9 @@ in {
           "CLAWDIS_CONFIG_PATH=${instCfg.configPath}"
           "CLAWDIS_STATE_DIR=${instCfg.stateDir}"
           "CLAWDIS_NIX_MODE=1"
-        ];
+        ] ++ (lib.mapAttrsToList (k: v: "${k}=${v}") instCfg.environment);
+
+        EnvironmentFile = instCfg.environmentFiles;
 
         # Hardening options
         ProtectHome = true;

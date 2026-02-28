@@ -20,6 +20,12 @@ Full Linux support including `aarch64-linux` and working systemd user services o
 
 Run Openclaw as an isolated system user with systemd hardening. Contains the blast radius if the LLM is compromised — `ProtectHome`, `PrivateTmp`, `NoNewPrivileges`, syscall filtering, and more.
 
+- Multi-instance support
+- Typed provider options (Anthropic, Telegram)
+- Declarative documents and skills
+- Gateway auth (token/password)
+- Escape hatches: `environment`, `environmentFiles`, `servicePath`
+
 ```nix
 services.openclaw = {
   enable = true;
@@ -87,7 +93,7 @@ You talk to Telegram, your machine does things.
 
 ## Requirements
 
-1. **macOS** (Apple Silicon or Intel) or **Linux** (x86_64)
+1. **macOS** (Apple Silicon or Intel) or **Linux** (x86_64 or aarch64)
 2. **[Determinate Nix](https://docs.determinate.systems/determinate-nix/)** installed on your machine
 
 That's it. The Quick Start will guide you through everything else.
@@ -145,7 +151,7 @@ Copy this entire block and paste it to Claude, Cursor, or your preferred AI assi
 ```text
 I want to set up nix-openclaw on my machine (macOS or Linux).
 
-Repository: github:openclaw/nix-openclaw
+Repository: github:jeanlucthumm/nix-openclaw
 
 What nix-openclaw is:
 - Batteries-included Nix package for OpenClaw (AI assistant gateway)
@@ -188,7 +194,7 @@ Your agent will install Nix, create your config, and get OpenClaw running. You j
 2. Create a local config:
    ```bash
    mkdir -p ~/code/openclaw-local && cd ~/code/openclaw-local
-   nix flake init -t github:openclaw/nix-openclaw#agent-first
+   nix flake init -t github:jeanlucthumm/nix-openclaw#agent-first
    ```
 3. Edit `flake.nix` placeholders:
    - `system` = `aarch64-darwin` (Apple Silicon) or `x86_64-darwin` (Intel)
@@ -210,7 +216,7 @@ Your agent will install Nix, create your config, and get OpenClaw running. You j
 2. Create a local config:
    ```bash
    mkdir -p ~/code/openclaw-local && cd ~/code/openclaw-local
-   nix flake init -t github:openclaw/nix-openclaw#agent-first
+   nix flake init -t github:jeanlucthumm/nix-openclaw#agent-first
    ```
 3. Edit `flake.nix` placeholders:
    - `system` = `x86_64-linux`
@@ -599,7 +605,7 @@ Use a shared base config and override only what's different. After changing loca
 ```nix
 # flake inputs (pin prod + app)
 inputs = {
-  nix-openclaw.url = "github:openclaw/nix-openclaw?ref=v0.1.0"; # pins macOS app + gateway bundle
+  nix-openclaw.url = "github:jeanlucthumm/nix-openclaw?ref=v0.1.0"; # pins macOS app + gateway bundle
 };
 
 let
@@ -706,8 +712,7 @@ Pin lives in:
 
 ### Automated pipeline
 
-> **TODO:** Re-enable and adapt the yolo pin update workflow. Goal: auto-update pins,
-> build on Linux + macOS, validate config options, and promote to stable if green.
+A daily GitHub Actions workflow ("yolo updater") auto-updates pins to the latest green upstream commit, rebuilds the gateway in a Nix sandbox, and pushes to `main` if the build succeeds.
 
 ---
 
@@ -806,7 +811,7 @@ Namespaces are one honking great idea -- let's do more of those!
 
 ## Upstream
 
-Fork of [openclaw/nix-openclaw](https://github.com/openclaw/nix-openclaw) — upstream is no longer accepting contributions; this fork is actively maintained. Wraps [OpenClaw](https://github.com/openclaw/openclaw) by Peter Steinberger.
+Fork of [openclaw/nix-openclaw](https://github.com/openclaw/nix-openclaw). Adds Linux/aarch64 support, a hardened NixOS module, and daily automated pin updates. Wraps [OpenClaw](https://github.com/openclaw/openclaw) by Peter Steinberger.
 
 ## License
 

@@ -179,6 +179,24 @@ let
         };
       };
 
+      environment = lib.mkOption {
+        type = lib.types.attrsOf lib.types.str;
+        default = {};
+        description = "Additional environment variables for the gateway process.";
+      };
+
+      environmentFiles = lib.mkOption {
+        type = lib.types.listOf lib.types.str;
+        default = [];
+        description = "systemd EnvironmentFile= entries (use leading '-' to ignore missing).";
+      };
+
+      servicePath = lib.mkOption {
+        type = lib.types.listOf lib.types.package;
+        default = [];
+        description = "Extra packages added to the systemd service PATH.";
+      };
+
       configOverrides = lib.mkOption {
         type = lib.types.attrs;
         default = {};

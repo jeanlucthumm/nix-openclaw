@@ -2,7 +2,7 @@ name: Yolo Update Pins
 
 on:
   schedule:
-    - cron: "5 * * * *"
+    - cron: "5 4 * * *"
   workflow_dispatch: {}
 
 permissions:

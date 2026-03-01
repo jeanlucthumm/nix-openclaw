@@ -1,4 +1,4 @@
-# Generated from upstream OpenClaw schema at rev 134296276a66510570df580df49e167556990077. DO NOT EDIT.
+# Generated from upstream OpenClaw schema at rev 907c09e1d5ea20778716c888ed1e1f79f51c209a. DO NOT EDIT.
 # Generator: nix/scripts/generate-config-options.ts
 { lib }:
 let
@@ -60,8 +60,32 @@ in
         type = t.nullOr (t.int);
         default = null;
       };
+      deliveryMode = lib.mkOption {
+        type = t.nullOr (t.oneOf [ (t.enum [ "live" ]) (t.enum [ "final_only" ]) ]);
+        default = null;
+      };
+      hiddenBoundarySeparator = lib.mkOption {
+        type = t.nullOr (t.oneOf [ (t.enum [ "none" ]) (t.enum [ "space" ]) (t.enum [ "newline" ]) (t.enum [ "paragraph" ]) ]);
+        default = null;
+      };
       maxChunkChars = lib.mkOption {
         type = t.nullOr (t.int);
+        default = null;
+      };
+      maxOutputChars = lib.mkOption {
+        type = t.nullOr (t.int);
+        default = null;
+      };
+      maxSessionUpdateChars = lib.mkOption {
+        type = t.nullOr (t.int);
+        default = null;
+      };
+      repeatSuppression = lib.mkOption {
+        type = t.nullOr (t.bool);
+        default = null;
+      };
+      tagVisibility = lib.mkOption {
+        type = t.nullOr (t.attrsOf (t.bool));
         default = null;
       };
     }; });

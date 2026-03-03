@@ -24,6 +24,7 @@ Run Openclaw as an isolated system user with systemd hardening. Contains the bla
 - Typed provider options (Anthropic, Telegram)
 - Declarative documents and skills
 - Gateway auth (token/password)
+- Bash tool execution works (fixes upstream "account not available" error)
 - Escape hatches: `environment`, `environmentFiles`, `servicePath`
 
 ```nix

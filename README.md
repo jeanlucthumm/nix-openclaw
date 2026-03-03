@@ -25,6 +25,7 @@ Run Openclaw as an isolated system user with systemd hardening. Contains the bla
 - Declarative documents and skills
 - Gateway auth (token/password)
 - Bash tool execution works (fixes upstream "account not available" error)
+- Local memory search works out of the box (`memorySearch.provider = "local"`) — upstream fails on NixOS because node-llama-cpp can't find glibc
 - Escape hatches: `environment`, `environmentFiles`, `servicePath`
 
 ```nix

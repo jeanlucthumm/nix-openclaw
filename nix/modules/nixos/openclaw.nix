@@ -305,6 +305,10 @@ in {
           # Openclaw reads $SHELL to spawn tool commands; system users
           # default to nologin which breaks tool execution.
           "SHELL=${pkgs.bashInteractive}/bin/bash"
+          # node-llama-cpp checks for glibc in FHS paths to decide whether
+          # pre-built binaries can be used. Without this, it fails to detect
+          # glibc on NixOS and refuses to load the bundled llama binary.
+          "LD_LIBRARY_PATH=${pkgs.stdenv.cc.libc}/lib"
         ] ++ (lib.mapAttrsToList (k: v: "${k}=${v}") instCfg.environment);
 
         EnvironmentFile = instCfg.environmentFiles;

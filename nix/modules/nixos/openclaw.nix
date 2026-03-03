@@ -259,6 +259,7 @@ in {
       group = cfg.group;
       home = cfg.stateDir;
       createHome = true;
+      shell = pkgs.bashInteractive;
       description = "Openclaw gateway service user";
     };
 
@@ -301,6 +302,9 @@ in {
           "CLAWDIS_CONFIG_PATH=${instCfg.configPath}"
           "CLAWDIS_STATE_DIR=${instCfg.stateDir}"
           "CLAWDIS_NIX_MODE=1"
+          # Openclaw reads $SHELL to spawn tool commands; system users
+          # default to nologin which breaks tool execution.
+          "SHELL=${pkgs.bashInteractive}/bin/bash"
         ] ++ (lib.mapAttrsToList (k: v: "${k}=${v}") instCfg.environment);
 
         EnvironmentFile = instCfg.environmentFiles;

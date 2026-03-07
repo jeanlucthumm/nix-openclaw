@@ -20,6 +20,7 @@ Full Linux support including `aarch64-linux` and working systemd user services o
 
 Run Openclaw as an isolated system user with systemd hardening. Contains the blast radius if the LLM is compromised — `ProtectHome`, `PrivateTmp`, `NoNewPrivileges`, syscall filtering, and more.
 
+- Declarative plugins — same `bundledPlugins`/`customPlugins` as home-manager, fully resolved
 - Multi-instance support
 - Typed provider options (Anthropic, Telegram)
 - Declarative documents and skills
@@ -32,6 +33,8 @@ Run Openclaw as an isolated system user with systemd hardening. Contains the bla
 services.openclaw = {
   enable = true;
   providers.anthropic.oauthTokenFile = config.age.secrets.openclaw-token.path;
+  bundledPlugins.summarize.enable = true;
+  customPlugins = [{ source = "github:owner/my-plugin"; }];
 };
 ```
 

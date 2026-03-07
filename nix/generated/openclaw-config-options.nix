@@ -1,4 +1,4 @@
-# Generated from upstream OpenClaw schema at rev 16f9f4dd2203649ca8718d2a7a332b999a64b3db. DO NOT EDIT.
+# Generated from upstream OpenClaw schema at rev 6017b738b1ab87cee16192e99cb597e2fc095da0. DO NOT EDIT.
 # Generator: nix/scripts/generate-config-options.ts
 { lib }:
 let
@@ -338,6 +338,10 @@ in
         };
         mode = lib.mkOption {
           type = t.nullOr (t.oneOf [ (t.enum [ "default" ]) (t.enum [ "safeguard" ]) ]);
+          default = null;
+        };
+        postCompactionSections = lib.mkOption {
+          type = t.nullOr (t.listOf (t.str));
           default = null;
         };
         qualityGuard = lib.mkOption {
@@ -9910,7 +9914,7 @@ in
         default = null;
       };
       retryOn = lib.mkOption {
-        type = t.nullOr (t.listOf (t.enum [ "rate_limit" "network" "timeout" "server_error" ]));
+        type = t.nullOr (t.listOf (t.enum [ "rate_limit" "overloaded" "network" "timeout" "server_error" ]));
         default = null;
       };
     }; });
@@ -10291,6 +10295,47 @@ in
           type = t.nullOr (t.submodule { options = {
           enabled = lib.mkOption {
             type = t.nullOr (t.bool);
+            default = null;
+          };
+          images = lib.mkOption {
+            type = t.nullOr (t.submodule { options = {
+            allowUrl = lib.mkOption {
+              type = t.nullOr (t.bool);
+              default = null;
+            };
+            allowedMimes = lib.mkOption {
+              type = t.nullOr (t.listOf (t.str));
+              default = null;
+            };
+            maxBytes = lib.mkOption {
+              type = t.nullOr (t.int);
+              default = null;
+            };
+            maxRedirects = lib.mkOption {
+              type = t.nullOr (t.int);
+              default = null;
+            };
+            timeoutMs = lib.mkOption {
+              type = t.nullOr (t.int);
+              default = null;
+            };
+            urlAllowlist = lib.mkOption {
+              type = t.nullOr (t.listOf (t.str));
+              default = null;
+            };
+          }; });
+            default = null;
+          };
+          maxBodyBytes = lib.mkOption {
+            type = t.nullOr (t.int);
+            default = null;
+          };
+          maxImageParts = lib.mkOption {
+            type = t.nullOr (t.int);
+            default = null;
+          };
+          maxTotalImageBytes = lib.mkOption {
+            type = t.nullOr (t.int);
             default = null;
           };
         }; });
@@ -10969,6 +11014,10 @@ in
     type = t.nullOr (t.submodule { options = {
     preserveFilenames = lib.mkOption {
       type = t.nullOr (t.bool);
+      default = null;
+    };
+    ttlHours = lib.mkOption {
+      type = t.nullOr (t.int);
       default = null;
     };
   }; });
@@ -11759,6 +11808,10 @@ in
             type = t.nullOr (t.bool);
             default = null;
           };
+          supportsTools = lib.mkOption {
+            type = t.nullOr (t.bool);
+            default = null;
+          };
           supportsUsageInStreaming = lib.mkOption {
             type = t.nullOr (t.bool);
             default = null;
@@ -11944,6 +11997,10 @@ in
     };
     slots = lib.mkOption {
       type = t.nullOr (t.submodule { options = {
+      contextEngine = lib.mkOption {
+        type = t.nullOr (t.str);
+        default = null;
+      };
       memory = lib.mkOption {
         type = t.nullOr (t.str);
         default = null;

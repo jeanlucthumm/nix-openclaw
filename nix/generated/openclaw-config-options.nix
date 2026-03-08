@@ -1,4 +1,4 @@
-# Generated from upstream OpenClaw schema at rev 6017b738b1ab87cee16192e99cb597e2fc095da0. DO NOT EDIT.
+# Generated from upstream OpenClaw schema at rev a035a3ce48e45b925f45bd0e289ba07b7e2b5991. DO NOT EDIT.
 # Generator: nix/scripts/generate-config-options.ts
 { lib }:
 let
@@ -355,6 +355,10 @@ in
             default = null;
           };
         }; });
+          default = null;
+        };
+        recentTurnsPreserve = lib.mkOption {
+          type = t.nullOr (t.int);
           default = null;
         };
         reserveTokens = lib.mkOption {
@@ -3112,6 +3116,15 @@ in
           type = t.nullOr (t.str);
           default = null;
         };
+        agentComponents = lib.mkOption {
+          type = t.nullOr (t.submodule { options = {
+          enabled = lib.mkOption {
+            type = t.nullOr (t.bool);
+            default = null;
+          };
+        }; });
+          default = null;
+        };
         allowBots = lib.mkOption {
           type = t.nullOr (t.oneOf [ (t.bool) (t.enum [ "mentions" ]) ]);
           default = null;
@@ -4084,6 +4097,15 @@ in
       };
       activityUrl = lib.mkOption {
         type = t.nullOr (t.str);
+        default = null;
+      };
+      agentComponents = lib.mkOption {
+        type = t.nullOr (t.submodule { options = {
+        enabled = lib.mkOption {
+          type = t.nullOr (t.bool);
+          default = null;
+        };
+      }; });
         default = null;
       };
       allowBots = lib.mkOption {
@@ -8711,6 +8733,11 @@ in
           type = t.nullOr (t.str);
           default = null;
         };
+        webhookCertPath = lib.mkOption {
+          type = t.nullOr (t.str);
+          default = null;
+          description = "Path to the self-signed certificate (PEM) to upload to Telegram during webhook registration. Required for self-signed certs (direct IP or no domain).";
+        };
         webhookHost = lib.mkOption {
           type = t.nullOr (t.str);
           default = null;
@@ -9296,6 +9323,11 @@ in
       tokenFile = lib.mkOption {
         type = t.nullOr (t.str);
         default = null;
+      };
+      webhookCertPath = lib.mkOption {
+        type = t.nullOr (t.str);
+        default = null;
+        description = "Path to the self-signed certificate (PEM) to upload to Telegram during webhook registration. Required for self-signed certs (direct IP or no domain).";
       };
       webhookHost = lib.mkOption {
         type = t.nullOr (t.str);
@@ -11757,7 +11789,37 @@ in
         type = t.str;
       };
       headers = lib.mkOption {
-        type = t.nullOr (t.attrsOf (t.str));
+        type = t.nullOr (t.attrsOf (t.oneOf [ (t.str) (t.oneOf [ (t.submodule { options = {
+        id = lib.mkOption {
+          type = t.str;
+        };
+        provider = lib.mkOption {
+          type = t.str;
+        };
+        source = lib.mkOption {
+          type = t.enum [ "env" ];
+        };
+      }; }) (t.submodule { options = {
+        id = lib.mkOption {
+          type = t.str;
+        };
+        provider = lib.mkOption {
+          type = t.str;
+        };
+        source = lib.mkOption {
+          type = t.enum [ "file" ];
+        };
+      }; }) (t.submodule { options = {
+        id = lib.mkOption {
+          type = t.str;
+        };
+        provider = lib.mkOption {
+          type = t.str;
+        };
+        source = lib.mkOption {
+          type = t.enum [ "exec" ];
+        };
+      }; }) ]) ]));
         default = null;
       };
       injectNumCtxForOpenAICompat = lib.mkOption {

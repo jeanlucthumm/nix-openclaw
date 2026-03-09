@@ -6,11 +6,11 @@
 
 stdenvNoCC.mkDerivation {
   pname = "openclaw-app";
-  version = "2026.3.2";
+  version = "2026.3.7";
 
   src = fetchzip {
-    url = "https://github.com/openclaw/openclaw/releases/download/v2026.3.2/OpenClaw-2026.3.2.zip";
-    hash = "sha256-vOlO1oNUVfG3eVOZ2rRX9hhmQqCxysdv6u1LZ/clfkg=";
+    url = "https://github.com/openclaw/openclaw/releases/download/v2026.3.7/OpenClaw-2026.3.7.zip";
+    hash = "sha256-4unXmu6LvCz/3gfPto1yoR8xglZobWuU5GPxPbuDqSU=";
     stripRoot = false;
   };
 

@@ -1,4 +1,4 @@
-# Generated from upstream OpenClaw schema at rev a035a3ce48e45b925f45bd0e289ba07b7e2b5991. DO NOT EDIT.
+# Generated from upstream OpenClaw schema at rev 26e76f9a6149c78a62bcd1531ad58894e1677ea7. DO NOT EDIT.
 # Generator: nix/scripts/generate-config-options.ts
 { lib }:
 let
@@ -338,6 +338,10 @@ in
         };
         mode = lib.mkOption {
           type = t.nullOr (t.oneOf [ (t.enum [ "default" ]) (t.enum [ "safeguard" ]) ]);
+          default = null;
+        };
+        model = lib.mkOption {
+          type = t.nullOr (t.str);
           default = null;
         };
         postCompactionSections = lib.mkOption {
@@ -2440,10 +2444,14 @@ in
         type = t.str;
       };
       driver = lib.mkOption {
-        type = t.nullOr (t.oneOf [ (t.enum [ "clawd" ]) (t.enum [ "extension" ]) ]);
+        type = t.nullOr (t.oneOf [ (t.enum [ "openclaw" ]) (t.enum [ "clawd" ]) (t.enum [ "extension" ]) ]);
         default = null;
       };
     }; }));
+      default = null;
+    };
+    relayBindHost = lib.mkOption {
+      type = t.nullOr (t.oneOf [ (t.str) (t.str) ]);
       default = null;
     };
     remoteCdpHandshakeTimeoutMs = lib.mkOption {
@@ -12669,6 +12677,10 @@ in
     }; }));
       default = null;
     };
+    silenceTimeoutMs = lib.mkOption {
+      type = t.nullOr (t.int);
+      default = null;
+    };
     voiceAliases = lib.mkOption {
       type = t.nullOr (t.attrsOf (t.str));
       default = null;
@@ -13879,6 +13891,15 @@ in
             type = t.enum [ "exec" ];
           };
         }; }) ]) ]);
+          default = null;
+        };
+        brave = lib.mkOption {
+          type = t.nullOr (t.submodule { options = {
+          mode = lib.mkOption {
+            type = t.nullOr (t.oneOf [ (t.enum [ "web" ]) (t.enum [ "llm-context" ]) ]);
+            default = null;
+          };
+        }; });
           default = null;
         };
         cacheTtlMinutes = lib.mkOption {

@@ -1,4 +1,4 @@
-# Generated from upstream OpenClaw schema at rev 705c6a422dfc75463cedc2f51d1a46cd2384d8b7. DO NOT EDIT.
+# Generated from upstream OpenClaw schema at rev bf70a333fa53412ad6039c9c01804af92545ed8c. DO NOT EDIT.
 # Generator: nix/scripts/generate-config-options.ts
 { lib }:
 let
@@ -3345,6 +3345,10 @@ in
               type = t.nullOr (t.bool);
               default = null;
             };
+            autoArchiveDuration = lib.mkOption {
+              type = t.nullOr (t.oneOf [ (t.enum [ "60" "1440" "4320" "10080" ]) (t.enum [ 60 ]) (t.enum [ 1440 ]) (t.enum [ 4320 ]) (t.enum [ 10080 ]) ]);
+              default = null;
+            };
             autoThread = lib.mkOption {
               type = t.nullOr (t.bool);
               default = null;
@@ -4330,6 +4334,10 @@ in
           type = t.nullOr (t.attrsOf (t.submodule { options = {
           allow = lib.mkOption {
             type = t.nullOr (t.bool);
+            default = null;
+          };
+          autoArchiveDuration = lib.mkOption {
+            type = t.nullOr (t.oneOf [ (t.enum [ "60" "1440" "4320" "10080" ]) (t.enum [ 60 ]) (t.enum [ 1440 ]) (t.enum [ 4320 ]) (t.enum [ 10080 ]) ]);
             default = null;
           };
           autoThread = lib.mkOption {

@@ -1,4 +1,4 @@
-# Generated from upstream OpenClaw schema at rev bf70a333fa53412ad6039c9c01804af92545ed8c. DO NOT EDIT.
+# Generated from upstream OpenClaw schema at rev 70abee69e913a6256febb4d573f4534a6f9bda7a. DO NOT EDIT.
 # Generator: nix/scripts/generate-config-options.ts
 { lib }:
 let
@@ -653,6 +653,27 @@ in
         };
         model = lib.mkOption {
           type = t.nullOr (t.str);
+          default = null;
+        };
+        multimodal = lib.mkOption {
+          type = t.nullOr (t.submodule { options = {
+          enabled = lib.mkOption {
+            type = t.nullOr (t.bool);
+            default = null;
+          };
+          maxFileBytes = lib.mkOption {
+            type = t.nullOr (t.int);
+            default = null;
+          };
+          modalities = lib.mkOption {
+            type = t.nullOr (t.listOf (t.oneOf [ (t.enum [ "image" ]) (t.enum [ "audio" ]) (t.enum [ "all" ]) ]));
+            default = null;
+          };
+        }; });
+          default = null;
+        };
+        outputDimensionality = lib.mkOption {
+          type = t.nullOr (t.int);
           default = null;
         };
         provider = lib.mkOption {
@@ -1411,6 +1432,27 @@ in
         };
         model = lib.mkOption {
           type = t.nullOr (t.str);
+          default = null;
+        };
+        multimodal = lib.mkOption {
+          type = t.nullOr (t.submodule { options = {
+          enabled = lib.mkOption {
+            type = t.nullOr (t.bool);
+            default = null;
+          };
+          maxFileBytes = lib.mkOption {
+            type = t.nullOr (t.int);
+            default = null;
+          };
+          modalities = lib.mkOption {
+            type = t.nullOr (t.listOf (t.oneOf [ (t.enum [ "image" ]) (t.enum [ "audio" ]) (t.enum [ "all" ]) ]));
+            default = null;
+          };
+        }; });
+          default = null;
+        };
+        outputDimensionality = lib.mkOption {
+          type = t.nullOr (t.int);
           default = null;
         };
         provider = lib.mkOption {
@@ -3974,8 +4016,16 @@ in
                 type = t.nullOr (t.str);
                 default = null;
               };
+              instructions = lib.mkOption {
+                type = t.nullOr (t.str);
+                default = null;
+              };
               model = lib.mkOption {
                 type = t.nullOr (t.str);
+                default = null;
+              };
+              speed = lib.mkOption {
+                type = t.nullOr (t.number);
                 default = null;
               };
               voice = lib.mkOption {
@@ -4965,8 +5015,16 @@ in
               type = t.nullOr (t.str);
               default = null;
             };
+            instructions = lib.mkOption {
+              type = t.nullOr (t.str);
+              default = null;
+            };
             model = lib.mkOption {
               type = t.nullOr (t.str);
+              default = null;
+            };
+            speed = lib.mkOption {
+              type = t.nullOr (t.number);
               default = null;
             };
             voice = lib.mkOption {
@@ -6827,9 +6885,17 @@ in
         type = t.nullOr (t.str);
         default = null;
       };
+      accountUuid = lib.mkOption {
+        type = t.nullOr (t.str);
+        default = null;
+      };
       accounts = lib.mkOption {
         type = t.nullOr (t.attrsOf (t.submodule { options = {
         account = lib.mkOption {
+          type = t.nullOr (t.str);
+          default = null;
+        };
+        accountUuid = lib.mkOption {
           type = t.nullOr (t.str);
           default = null;
         };
@@ -8231,7 +8297,15 @@ in
         };
         actions = lib.mkOption {
           type = t.nullOr (t.submodule { options = {
+          createForumTopic = lib.mkOption {
+            type = t.nullOr (t.bool);
+            default = null;
+          };
           deleteMessage = lib.mkOption {
+            type = t.nullOr (t.bool);
+            default = null;
+          };
+          editMessage = lib.mkOption {
             type = t.nullOr (t.bool);
             default = null;
           };
@@ -8843,7 +8917,15 @@ in
       };
       actions = lib.mkOption {
         type = t.nullOr (t.submodule { options = {
+        createForumTopic = lib.mkOption {
+          type = t.nullOr (t.bool);
+          default = null;
+        };
         deleteMessage = lib.mkOption {
+          type = t.nullOr (t.bool);
+          default = null;
+        };
+        editMessage = lib.mkOption {
           type = t.nullOr (t.bool);
           default = null;
         };
@@ -11720,8 +11802,16 @@ in
           type = t.nullOr (t.str);
           default = null;
         };
+        instructions = lib.mkOption {
+          type = t.nullOr (t.str);
+          default = null;
+        };
         model = lib.mkOption {
           type = t.nullOr (t.str);
+          default = null;
+        };
+        speed = lib.mkOption {
+          type = t.nullOr (t.number);
           default = null;
         };
         voice = lib.mkOption {

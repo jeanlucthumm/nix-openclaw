@@ -1,4 +1,4 @@
-# Generated from upstream OpenClaw schema at rev 70abee69e913a6256febb4d573f4534a6f9bda7a. DO NOT EDIT.
+# Generated from upstream OpenClaw schema at rev c38e7b027076ee8294100f7f5dfa4b39bb15e4a5. DO NOT EDIT.
 # Generator: nix/scripts/generate-config-options.ts
 { lib }:
 let
@@ -346,6 +346,10 @@ in
         };
         postCompactionSections = lib.mkOption {
           type = t.nullOr (t.listOf (t.str));
+          default = null;
+        };
+        postIndexSync = lib.mkOption {
+          type = t.nullOr (t.enum [ "off" "async" "await" ]);
           default = null;
         };
         qualityGuard = lib.mkOption {
@@ -864,6 +868,10 @@ in
             };
             deltaMessages = lib.mkOption {
               type = t.nullOr (t.int);
+              default = null;
+            };
+            postCompactionForce = lib.mkOption {
+              type = t.nullOr (t.bool);
               default = null;
             };
           }; });
@@ -1643,6 +1651,10 @@ in
             };
             deltaMessages = lib.mkOption {
               type = t.nullOr (t.int);
+              default = null;
+            };
+            postCompactionForce = lib.mkOption {
+              type = t.nullOr (t.bool);
               default = null;
             };
           }; });
@@ -8420,10 +8432,10 @@ in
         customCommands = lib.mkOption {
           type = t.nullOr (t.listOf (t.submodule { options = {
           command = lib.mkOption {
-            type = t.anything;
+            type = t.str;
           };
           description = lib.mkOption {
-            type = t.anything;
+            type = t.str;
           };
         }; }));
           default = null;
@@ -9040,10 +9052,10 @@ in
       customCommands = lib.mkOption {
         type = t.nullOr (t.listOf (t.submodule { options = {
         command = lib.mkOption {
-          type = t.anything;
+          type = t.str;
         };
         description = lib.mkOption {
-          type = t.anything;
+          type = t.str;
         };
       }; }));
         default = null;
@@ -10666,6 +10678,29 @@ in
       type = t.nullOr (t.int);
       default = null;
     };
+    push = lib.mkOption {
+      type = t.nullOr (t.submodule { options = {
+      apns = lib.mkOption {
+        type = t.nullOr (t.submodule { options = {
+        relay = lib.mkOption {
+          type = t.nullOr (t.submodule { options = {
+          baseUrl = lib.mkOption {
+            type = t.nullOr (t.str);
+            default = null;
+          };
+          timeoutMs = lib.mkOption {
+            type = t.nullOr (t.int);
+            default = null;
+          };
+        }; });
+          default = null;
+        };
+      }; });
+        default = null;
+      };
+    }; });
+      default = null;
+    };
     reload = lib.mkOption {
       type = t.nullOr (t.submodule { options = {
       debounceMs = lib.mkOption {
@@ -11504,6 +11539,10 @@ in
       emojis = lib.mkOption {
         type = t.nullOr (t.submodule { options = {
         coding = lib.mkOption {
+          type = t.nullOr (t.str);
+          default = null;
+        };
+        compacting = lib.mkOption {
           type = t.nullOr (t.str);
           default = null;
         };

@@ -12,12 +12,6 @@
 
 This fork builds on top of the base nix-openclaw package. Here's what's different:
 
-### Build Correctness
-
-Upstream's Nix build is missing post-build steps that the gateway depends on at runtime. This fork adds them so things actually work:
-
-- **Plugin manifests** — without the `runtime-postbuild` step, the gateway can't discover any bundled extensions. Telegram, Discord, Slack, and all other channel providers silently fail to start. ([#8](https://github.com/jeanlucthumm/nix-openclaw/pull/8))
-
 ### Linux Support
 
 Full Linux support including `aarch64-linux` and working systemd user services out of the box.
@@ -39,6 +33,10 @@ services.openclaw = {
   providers.anthropic.oauthTokenFile = config.age.secrets.openclaw-token.path;
 };
 ```
+
+### Build Correctness
+
+Fixes missing build steps that cause channel providers (Telegram, Discord, etc.) to silently fail to start. ([#8](https://github.com/jeanlucthumm/nix-openclaw/pull/8))
 
 ---
 

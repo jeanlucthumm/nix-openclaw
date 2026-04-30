@@ -1,4 +1,4 @@
-# Generated from upstream OpenClaw schema at rev d674225d88cfcba32fdc72a589cbf03a2128c24f. DO NOT EDIT.
+# Generated from upstream OpenClaw schema at rev 3af4575a849ddb9fa239e0232b77f0afbb7f0a10. DO NOT EDIT.
 # Generator: nix/scripts/generate-config-options.ts
 { lib }:
 let
@@ -660,6 +660,10 @@ in
           type = t.nullOr (t.str);
           default = null;
         };
+        skipWhenBusy = lib.mkOption {
+          type = t.nullOr (t.bool);
+          default = null;
+        };
         suppressToolErrorWarnings = lib.mkOption {
           type = t.nullOr (t.bool);
           default = null;
@@ -1190,6 +1194,10 @@ in
           default = null;
         };
       }; });
+        default = null;
+      };
+      reasoningDefault = lib.mkOption {
+        type = t.nullOr (t.oneOf [ (t.enum [ "off" ]) (t.enum [ "on" ]) (t.enum [ "stream" ]) ]);
         default = null;
       };
       repoRoot = lib.mkOption {
@@ -1887,6 +1895,10 @@ in
         };
         session = lib.mkOption {
           type = t.nullOr (t.str);
+          default = null;
+        };
+        skipWhenBusy = lib.mkOption {
+          type = t.nullOr (t.bool);
           default = null;
         };
         suppressToolErrorWarnings = lib.mkOption {
@@ -3664,6 +3676,27 @@ in
     }; });
       default = null;
     };
+    tabCleanup = lib.mkOption {
+      type = t.nullOr (t.submodule { options = {
+      enabled = lib.mkOption {
+        type = t.nullOr (t.bool);
+        default = null;
+      };
+      idleMinutes = lib.mkOption {
+        type = t.nullOr (t.int);
+        default = null;
+      };
+      maxTabsPerSession = lib.mkOption {
+        type = t.nullOr (t.int);
+        default = null;
+      };
+      sweepMinutes = lib.mkOption {
+        type = t.nullOr (t.int);
+        default = null;
+      };
+    }; });
+      default = null;
+    };
   }; });
     default = null;
   };
@@ -3770,6 +3803,20 @@ in
     };
     useAccessGroups = lib.mkOption {
       type = t.nullOr (t.bool);
+      default = null;
+    };
+  }; });
+    default = null;
+  };
+
+  commitments = lib.mkOption {
+    type = t.nullOr (t.submodule { options = {
+    enabled = lib.mkOption {
+      type = t.nullOr (t.bool);
+      default = null;
+    };
+    maxPerDay = lib.mkOption {
+      type = t.nullOr (t.int);
       default = null;
     };
   }; });
@@ -5320,6 +5367,14 @@ in
           type = t.nullOr (t.bool);
           default = null;
         };
+        startup = lib.mkOption {
+          type = t.nullOr (t.enum [ "off" "idle" "immediate" ]);
+          default = null;
+        };
+        startupDelayMs = lib.mkOption {
+          type = t.nullOr (t.int);
+          default = null;
+        };
         updateTimeoutMs = lib.mkOption {
           type = t.nullOr (t.int);
           default = null;
@@ -5747,6 +5802,10 @@ in
         default = null;
       };
     }; });
+      default = null;
+    };
+    visibleReplies = lib.mkOption {
+      type = t.nullOr (t.enum [ "automatic" "message_tool" ]);
       default = null;
     };
   }; });
@@ -12759,6 +12818,10 @@ in
         };
         ssrfPolicy = lib.mkOption {
           type = t.nullOr (t.submodule { options = {
+          allowIpv6UniqueLocalRange = lib.mkOption {
+            type = t.nullOr (t.bool);
+            default = null;
+          };
           allowRfc2544BenchmarkRange = lib.mkOption {
             type = t.nullOr (t.bool);
             default = null;

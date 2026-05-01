@@ -1,4 +1,4 @@
-# Generated from upstream OpenClaw schema at rev 3af4575a849ddb9fa239e0232b77f0afbb7f0a10. DO NOT EDIT.
+# Generated from upstream OpenClaw schema at rev 5d1ba08e3c97afa3f90b065d293ceff2bfa9b767. DO NOT EDIT.
 # Generator: nix/scripts/generate-config-options.ts
 { lib }:
 let
@@ -380,6 +380,15 @@ in
           };
           systemPrompt = lib.mkOption {
             type = t.nullOr (t.str);
+            default = null;
+          };
+        }; });
+          default = null;
+        };
+        midTurnPrecheck = lib.mkOption {
+          type = t.nullOr (t.submodule { options = {
+          enabled = lib.mkOption {
+            type = t.nullOr (t.bool);
             default = null;
           };
         }; });

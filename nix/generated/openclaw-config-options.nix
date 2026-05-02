@@ -1,4 +1,4 @@
-# Generated from upstream OpenClaw schema at rev 5d1ba08e3c97afa3f90b065d293ceff2bfa9b767. DO NOT EDIT.
+# Generated from upstream OpenClaw schema at rev cb9d7884cca3a8234637d6ee82e66a50d86c42a9. DO NOT EDIT.
 # Generator: nix/scripts/generate-config-options.ts
 { lib }:
 let
@@ -7,6 +7,32 @@ in
 {
   "$schema" = lib.mkOption {
     type = t.nullOr (t.str);
+    default = null;
+  };
+
+  accessGroups = lib.mkOption {
+    type = t.nullOr (t.attrsOf (t.oneOf [ (t.submodule { options = {
+    channelId = lib.mkOption {
+      type = t.str;
+    };
+    guildId = lib.mkOption {
+      type = t.str;
+    };
+    membership = lib.mkOption {
+      type = t.nullOr (t.enum [ "canViewChannel" ]);
+      default = null;
+    };
+    type = lib.mkOption {
+      type = t.enum [ "discord.channelAudience" ];
+    };
+  }; }) (t.submodule { options = {
+    members = lib.mkOption {
+      type = t.attrsOf (t.listOf (t.str));
+    };
+    type = lib.mkOption {
+      type = t.enum [ "message.senders" ];
+    };
+  }; }) ]));
     default = null;
   };
 
@@ -1605,6 +1631,10 @@ in
       };
       skipBootstrap = lib.mkOption {
         type = t.nullOr (t.bool);
+        default = null;
+      };
+      skipOptionalBootstrapFiles = lib.mkOption {
+        type = t.nullOr (t.listOf (t.enum [ "SOUL.md" "USER.md" "HEARTBEAT.md" "IDENTITY.md" ]));
         default = null;
       };
       startupContext = lib.mkOption {
@@ -4938,6 +4968,34 @@ in
           type = t.nullOr (t.str);
           default = null;
         };
+        clawpackManifestSha256 = lib.mkOption {
+          type = t.nullOr (t.str);
+          default = null;
+        };
+        clawpackSha256 = lib.mkOption {
+          type = t.nullOr (t.str);
+          default = null;
+        };
+        clawpackSize = lib.mkOption {
+          type = t.nullOr (t.int);
+          default = null;
+        };
+        clawpackSpecVersion = lib.mkOption {
+          type = t.nullOr (t.int);
+          default = null;
+        };
+        gitCommit = lib.mkOption {
+          type = t.nullOr (t.str);
+          default = null;
+        };
+        gitRef = lib.mkOption {
+          type = t.nullOr (t.str);
+          default = null;
+        };
+        gitUrl = lib.mkOption {
+          type = t.nullOr (t.str);
+          default = null;
+        };
         hooks = lib.mkOption {
           type = t.nullOr (t.listOf (t.str));
           default = null;
@@ -4975,7 +5033,7 @@ in
           default = null;
         };
         source = lib.mkOption {
-          type = t.oneOf [ (t.enum [ "npm" ]) (t.enum [ "archive" ]) (t.enum [ "path" ]) (t.enum [ "clawhub" ]) ];
+          type = t.oneOf [ (t.enum [ "npm" ]) (t.enum [ "archive" ]) (t.enum [ "path" ]) (t.enum [ "clawhub" ]) (t.enum [ "git" ]) ];
         };
         sourcePath = lib.mkOption {
           type = t.nullOr (t.str);

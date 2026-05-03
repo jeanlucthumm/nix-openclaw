@@ -1,4 +1,4 @@
-# Generated from upstream OpenClaw schema at rev cb9d7884cca3a8234637d6ee82e66a50d86c42a9. DO NOT EDIT.
+# Generated from upstream OpenClaw schema at rev 775c27433fa3c919bbd53c7cd99aa4578874b78a. DO NOT EDIT.
 # Generator: nix/scripts/generate-config-options.ts
 { lib }:
 let
@@ -251,6 +251,19 @@ in
         };
         reliability = lib.mkOption {
           type = t.nullOr (t.submodule { options = {
+          outputLimits = lib.mkOption {
+            type = t.nullOr (t.submodule { options = {
+            maxTurnLines = lib.mkOption {
+              type = t.nullOr (t.int);
+              default = null;
+            };
+            maxTurnRawChars = lib.mkOption {
+              type = t.nullOr (t.int);
+              default = null;
+            };
+          }; });
+            default = null;
+          };
           watchdog = lib.mkOption {
             type = t.nullOr (t.submodule { options = {
             fresh = lib.mkOption {
@@ -4367,6 +4380,10 @@ in
         type = t.nullOr (t.str);
         default = null;
       };
+      chatMessageMaxWidth = lib.mkOption {
+        type = t.nullOr (t.anything);
+        default = null;
+      };
       dangerouslyAllowHostHeaderOriginFallback = lib.mkOption {
         type = t.nullOr (t.bool);
         default = null;
@@ -4952,6 +4969,14 @@ in
       };
       installs = lib.mkOption {
         type = t.nullOr (t.attrsOf (t.submodule { options = {
+        artifactFormat = lib.mkOption {
+          type = t.nullOr (t.oneOf [ (t.enum [ "zip" ]) (t.enum [ "tgz" ]) ]);
+          default = null;
+        };
+        artifactKind = lib.mkOption {
+          type = t.nullOr (t.oneOf [ (t.enum [ "legacy-zip" ]) (t.enum [ "npm-pack" ]) ]);
+          default = null;
+        };
         clawhubChannel = lib.mkOption {
           type = t.nullOr (t.oneOf [ (t.enum [ "official" ]) (t.enum [ "community" ]) (t.enum [ "private" ]) ]);
           default = null;
@@ -5009,6 +5034,18 @@ in
           default = null;
         };
         integrity = lib.mkOption {
+          type = t.nullOr (t.str);
+          default = null;
+        };
+        npmIntegrity = lib.mkOption {
+          type = t.nullOr (t.str);
+          default = null;
+        };
+        npmShasum = lib.mkOption {
+          type = t.nullOr (t.str);
+          default = null;
+        };
+        npmTarballName = lib.mkOption {
           type = t.nullOr (t.str);
           default = null;
         };
@@ -6193,6 +6230,10 @@ in
         };
       }; });
       };
+      params = lib.mkOption {
+        type = t.nullOr (t.attrsOf (t.anything));
+        default = null;
+      };
       request = lib.mkOption {
         type = t.nullOr (t.submodule { options = {
         allowPrivateNetwork = lib.mkOption {
@@ -7096,10 +7137,6 @@ in
     }; });
       default = null;
     };
-    parentForkMaxTokens = lib.mkOption {
-      type = t.nullOr (t.int);
-      default = null;
-    };
     reset = lib.mkOption {
       type = t.nullOr (t.submodule { options = {
       atHour = lib.mkOption {
@@ -7259,6 +7296,10 @@ in
     };
     threadBindings = lib.mkOption {
       type = t.nullOr (t.submodule { options = {
+      defaultSpawnContext = lib.mkOption {
+        type = t.nullOr (t.enum [ "isolated" "fork" ]);
+        default = null;
+      };
       enabled = lib.mkOption {
         type = t.nullOr (t.bool);
         default = null;
@@ -7271,6 +7312,10 @@ in
         type = t.nullOr (t.number);
         default = null;
       };
+      spawnSessions = lib.mkOption {
+        type = t.nullOr (t.bool);
+        default = null;
+      };
     }; });
       default = null;
     };
@@ -7280,6 +7325,15 @@ in
     };
     typingMode = lib.mkOption {
       type = t.nullOr (t.oneOf [ (t.enum [ "never" ]) (t.enum [ "instant" ]) (t.enum [ "thinking" ]) (t.enum [ "message" ]) ]);
+      default = null;
+    };
+    writeLock = lib.mkOption {
+      type = t.nullOr (t.submodule { options = {
+      acquireTimeoutMs = lib.mkOption {
+        type = t.nullOr (t.int);
+        default = null;
+      };
+    }; });
       default = null;
     };
   }; });

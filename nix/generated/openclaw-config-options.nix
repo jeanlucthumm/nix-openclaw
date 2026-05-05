@@ -1,4 +1,4 @@
-# Generated from upstream OpenClaw schema at rev 0fcf2c64c06a7296b97fb112c209339df4841025. DO NOT EDIT.
+# Generated from upstream OpenClaw schema at rev 1d6de8da9f03b507913ebd6c0e679bdcfe11322b. DO NOT EDIT.
 # Generator: nix/scripts/generate-config-options.ts
 { lib }:
 let
@@ -3013,6 +3013,15 @@ in
             type = t.nullOr (t.int);
             default = null;
           };
+          postCompactionGuard = lib.mkOption {
+            type = t.nullOr (t.submodule { options = {
+            windowSize = lib.mkOption {
+              type = t.nullOr (t.int);
+              default = null;
+            };
+          }; });
+            default = null;
+          };
           unknownToolThreshold = lib.mkOption {
             type = t.nullOr (t.int);
             default = null;
@@ -4188,6 +4197,10 @@ in
         default = null;
       };
     }; });
+      default = null;
+    };
+    stuckSessionAbortMs = lib.mkOption {
+      type = t.nullOr (t.int);
       default = null;
     };
     stuckSessionWarnMs = lib.mkOption {
@@ -6895,6 +6908,10 @@ in
       type = t.nullOr (t.listOf (t.str));
       default = null;
     };
+    bundledDiscovery = lib.mkOption {
+      type = t.nullOr (t.enum [ "compat" "allowlist" ]);
+      default = null;
+    };
     deny = lib.mkOption {
       type = t.nullOr (t.listOf (t.str));
       default = null;
@@ -7878,6 +7895,15 @@ in
       };
       historySize = lib.mkOption {
         type = t.nullOr (t.int);
+        default = null;
+      };
+      postCompactionGuard = lib.mkOption {
+        type = t.nullOr (t.submodule { options = {
+        windowSize = lib.mkOption {
+          type = t.nullOr (t.int);
+          default = null;
+        };
+      }; });
         default = null;
       };
       unknownToolThreshold = lib.mkOption {
